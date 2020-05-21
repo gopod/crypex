@@ -1,35 +1,30 @@
 package hitbtc
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestRequests(t *testing.T) {
-	hitbtc, err := SetupHitBTC()
-	if err != nil {
-		t.Error(err)
+	var (
+		err error
 
-		return
-	}
+		hitbtc = SetupHitBTC(t)
+	)
 
 	t.Run("GetSymbol", func(t *testing.T) {
 		_, err = hitbtc.GetSymbol("BTC" + "USD")
-		if err != nil {
-			t.Error(err)
-		}
+		assert.NoError(t, err)
 	})
 
 	t.Run("GetSymbols", func(t *testing.T) {
 		_, err = hitbtc.GetSymbols()
-		if err != nil {
-			t.Error(err)
-		}
+		assert.NoError(t, err)
+
 	})
 
 	t.Run("GetBalances", func(t *testing.T) {
 		_, err = hitbtc.GetBalances()
-		if err != nil {
-			t.Error(err)
-		}
+		assert.NoError(t, err)
 	})
 }

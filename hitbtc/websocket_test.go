@@ -3,24 +3,24 @@ package hitbtc
 import (
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func SetupHitBTC() (instance *HitBTC, err error) {
+func SetupHitBTC(t *testing.T) (instance *HitBTC) {
 	var (
+		err error
+
 		publicKey = os.Getenv("HITBTC_PUBLIC_KEY")
 		secretKey = os.Getenv("HITBTC_SECRET_KEY")
 	)
 
 	instance, err = New()
-	if err != nil {
-		return nil, err
-	}
+	assert.NoError(t, err)
 
 	if publicKey != "" && secretKey != "" {
 		err = instance.Authenticate(publicKey, secretKey)
-		if err != nil {
-			return nil, err
-		}
+		assert.NoError(t, err)
 	}
 
 	return
@@ -29,17 +29,10 @@ func SetupHitBTC() (instance *HitBTC, err error) {
 func TestHitBTC(t *testing.T) {
 	var err error
 
-	hitbtc, err := SetupHitBTC()
-	if err != nil {
-		t.Error(err)
-
-		return
-	}
+	hitbtc := SetupHitBTC(t)
 
 	t.Run("Authenticate", func(t *testing.T) {
 		err = hitbtc.Authenticate("pubKey", "secKey")
-		if err != nil {
-			return
-		}
+		assert.Error(t, err)
 	})
 }
