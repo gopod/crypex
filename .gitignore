@@ -1,0 +1,18 @@
+# General
+.DS_Store
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Idea directory
+.idea
+
+# Dependency directories
+vendor/
