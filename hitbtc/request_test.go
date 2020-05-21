@@ -1,16 +1,11 @@
 package hitbtc
 
 import (
-	"os"
 	"testing"
 )
 
-var hitbtc *HitBTC
-
 func TestRequests(t *testing.T) {
-	var err error
-
-	hitbtc, err = New()
+	hitbtc, err := SetupHitBTC()
 	if err != nil {
 		t.Error(err)
 		os.Exit(0)
