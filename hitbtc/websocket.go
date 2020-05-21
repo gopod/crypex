@@ -44,19 +44,17 @@ func New() (instance *HitBTC, err error) {
 	return
 }
 
-type AuthenticateRequest struct {
-	PublicKey string `json:"pKey,required"`
-	SecretKey string `json:"sKey,required"`
-	Algorithm string `json:"algo,required"`
-}
-
 func (h *HitBTC) Authenticate(public, secret string) error {
-	err := h.Request("login",
-		&AuthenticateRequest{
-			PublicKey: public,
-			SecretKey: secret,
-			Algorithm: "BASIC",
-		}, nil)
+	request := struct {
+		PublicKey string `json:"pKey,required"`
+		SecretKey string `json:"sKey,required"`
+		Algorithm string `json:"algo,required"`
+	}{
+		PublicKey: public,
+		SecretKey: secret,
+		Algorithm: "BASIC",
+	}
+	err := h.Request("login", &request, nil)
 	if err != nil {
 		return err
 	}
