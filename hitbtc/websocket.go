@@ -74,7 +74,7 @@ func (h *HitBTC) Close() {
 
 type Response bool
 
-func (h *HitBTC) Subscription(method string, request interface{}) error {
+func (h *HitBTC) Subscribe(method string, request interface{}) error {
 	var response Response
 
 	err := h.Conn.Call(context.Background(), method, &request, &response)
