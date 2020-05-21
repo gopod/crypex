@@ -8,7 +8,8 @@ func TestRequests(t *testing.T) {
 	hitbtc, err := SetupHitBTC()
 	if err != nil {
 		t.Error(err)
-		os.Exit(0)
+
+		return
 	}
 
 	t.Run("GetSymbol", func(t *testing.T) {

@@ -32,7 +32,8 @@ func TestHitBTC(t *testing.T) {
 	hitbtc, err := SetupHitBTC()
 	if err != nil {
 		t.Error(err)
-		os.Exit(0)
+
+		return
 	}
 
 	t.Run("Authenticate", func(t *testing.T) {
