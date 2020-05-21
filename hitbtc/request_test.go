@@ -29,4 +29,11 @@ func TestRequests(t *testing.T) {
 			t.Error(err)
 		}
 	})
+
+	t.Run("GetBalances", func(t *testing.T) {
+		_, err = hitbtc.GetBalances()
+		if err != nil {
+			t.Error(err)
+		}
+	})
 }

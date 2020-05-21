@@ -35,3 +35,21 @@ func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
 
 	return
 }
+
+type Balance struct {
+	Currency string `json:"currency,required"`
+
+	Reserved  float64 `json:"reserved,string"`
+	Available float64 `json:"available,string"`
+}
+
+type Balances []Balance
+
+func (h *HitBTC) GetBalances() (response *Balances, err error) {
+	err = h.Request("getTradingBalance", nil, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
