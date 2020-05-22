@@ -1,5 +1,7 @@
 <img src=".github/crypex.png" alt="Crypex Logo" />
 
+![Crypex](https://github.com/ramezanius/crypex/workflows/Crypex/badge.svg)
+
 ## Overview
 Crypex is a Go package for trading and communicating with [various](#Exchanges) exchange API for cryptocurrency assets!
 
