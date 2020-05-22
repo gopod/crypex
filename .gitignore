@@ -12,7 +12,7 @@
 *.test
 
 # Idea directory
-.idea
+.idea/
 
 # Dependency directories
 vendor/
