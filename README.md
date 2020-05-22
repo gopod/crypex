@@ -9,7 +9,7 @@ The following cryptocurrency exchanges are supported:
 
 | Exchange   | Web Socket
 | ---------  | -----------
-| HitBTC     | **WIP**   
+| HitBTC     | B, C, O
 
 ## Licence
 [MIT](LICENCE)
