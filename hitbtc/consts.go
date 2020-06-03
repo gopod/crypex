@@ -1,6 +1,8 @@
 package hitbtc
 
 const (
+	Exchange = "HitBTC"
+
 	Period1Month = "1M"
 
 	Period7Day = "D7"
