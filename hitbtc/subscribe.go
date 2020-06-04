@@ -6,18 +6,18 @@ import (
 
 type Report struct {
 	ID          int64     `json:"id,string"`
-	Side        string    `json:"side,required"`
-	Type        string    `json:"type,required"`
+	Side        string    `json:"side"`
+	Type        string    `json:"type"`
 	Price       float64   `json:"price,string"`
-	Symbol      string    `json:"symbol,required"`
-	Status      string    `json:"status,required"`
+	Symbol      string    `json:"symbol"`
+	Status      string    `json:"status"`
 	Quantity    float64   `json:"quantity,string"`
-	StopPrice   bool      `json:"stopPrice,required"`
-	CreatedAt   time.Time `json:"createdAt,required"`
-	UpdatedAt   time.Time `json:"updatedAt,required"`
-	ExpireTime  time.Time `json:"expireTime,required"`
-	TimeInForce string    `json:"timeInForce,required"`
-	OrderID     string    `json:"clientOrderId,required"`
+	StopPrice   bool      `json:"stopPrice"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	ExpireTime  time.Time `json:"expireTime"`
+	TimeInForce string    `json:"timeInForce"`
+	OrderID     string    `json:"clientOrderId"`
 }
 
 type Reports []Report
@@ -38,9 +38,9 @@ func (h *HitBTC) SubscribeReports() (update <-chan ReportsUpdate, snapshot <-cha
 }
 
 type CandlesResponse struct {
-	Data   Candles `json:"data,required"`
-	Symbol string  `json:"symbol,required"`
-	Period string  `json:"period,required"`
+	Data   Candles `json:"data"`
+	Symbol string  `json:"symbol"`
+	Period string  `json:"period"`
 }
 
 type Candle struct {
@@ -50,7 +50,7 @@ type Candle struct {
 	Close       float64   `json:"close,string"`
 	Volume      float64   `json:"volume,string"`      // Total trading amount within 24 hours in base currency
 	VolumeQuote float64   `json:"volumeQuote,string"` // Total trading amount within 24 hours in quote currency
-	Timestamp   time.Time `json:"timestamp,required"`
+	Timestamp   time.Time `json:"timestamp"`
 }
 
 type Candles []Candle
@@ -58,11 +58,12 @@ type Candles []Candle
 type CandlesUpdate CandlesResponse
 type CandlesSnapshot CandlesResponse
 
-func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (update <-chan CandlesUpdate, snapshot <-chan CandlesSnapshot, err error) {
+func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
+	update <-chan CandlesUpdate, snapshot <-chan CandlesSnapshot, err error) {
 	request := struct {
-		Limit  int64  `json:"limit,required"`
-		Period string `json:"period,required"`
-		Symbol string `json:"symbol,required"`
+		Limit  int64  `json:"limit"`
+		Period string `json:"period"`
+		Symbol string `json:"symbol"`
 	}{
 		Symbol: symbol,
 		Period: period,
@@ -90,7 +91,7 @@ func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (up
 
 func (h *HitBTC) UnsubscribeCandles(symbol string) (err error) {
 	request := struct {
-		Symbol string `json:"symbol,required"`
+		Symbol string `json:"symbol"`
 	}{
 		Symbol: symbol,
 	}
@@ -110,27 +111,28 @@ func (h *HitBTC) UnsubscribeCandles(symbol string) (err error) {
 }
 
 type WSSubtypeTrade struct {
-	Size  string `json:"size,required"`
-	Price string `json:"price,required"`
+	Size  string `json:"size"`
+	Price string `json:"price"`
 }
 
 type OrderbookUpdate struct {
-	Ask      []WSSubtypeTrade `json:"ask,required"`
-	Bid      []WSSubtypeTrade `json:"bid,required"`
-	Symbol   string           `json:"symbol,required"`
-	Sequence int64            `json:"sequence,required"` // used to see if the snapshot is the latest
+	Ask      []WSSubtypeTrade `json:"ask"`
+	Bid      []WSSubtypeTrade `json:"bid"`
+	Symbol   string           `json:"symbol"`
+	Sequence int64            `json:"sequence"` // used to see if the snapshot is the latest
 }
 
 type OrderbookSnapshot struct {
-	Ask      []WSSubtypeTrade `json:"ask,required"`
-	Bid      []WSSubtypeTrade `json:"bid,required"`
-	Symbol   string           `json:"symbol,required"`
-	Sequence int64            `json:"sequence,required"` // used to see if update is the latest received
+	Ask      []WSSubtypeTrade `json:"ask"`
+	Bid      []WSSubtypeTrade `json:"bid"`
+	Symbol   string           `json:"symbol"`
+	Sequence int64            `json:"sequence"` // used to see if update is the latest received
 }
 
-func (h *HitBTC) SubscribeOrderbook(symbol string) (update <-chan OrderbookUpdate, snapshot <-chan OrderbookSnapshot, err error) {
+func (h *HitBTC) SubscribeOrderbook(symbol string) (
+	update <-chan OrderbookUpdate, snapshot <-chan OrderbookSnapshot, err error) {
 	request := struct {
-		Symbol string `json:"symbol,required"`
+		Symbol string `json:"symbol"`
 	}{
 		Symbol: symbol,
 	}
@@ -143,6 +145,7 @@ func (h *HitBTC) SubscribeOrderbook(symbol string) (update <-chan OrderbookUpdat
 	if h.Feeds.Notifications.OrderbookFeed[symbol] == nil {
 		h.Feeds.Notifications.OrderbookFeed[symbol] = make(chan OrderbookUpdate)
 	}
+
 	if h.Feeds.OrderbookFeed[symbol] == nil {
 		h.Feeds.OrderbookFeed[symbol] = make(chan OrderbookSnapshot)
 	}
@@ -155,7 +158,7 @@ func (h *HitBTC) SubscribeOrderbook(symbol string) (update <-chan OrderbookUpdat
 
 func (h *HitBTC) UnsubscribeOrderbook(symbol string) (err error) {
 	request := struct {
-		Symbol string `json:"symbol,required"`
+		Symbol string `json:"symbol"`
 	}{
 		Symbol: symbol,
 	}

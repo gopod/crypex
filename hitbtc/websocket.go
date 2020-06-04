@@ -3,6 +3,7 @@ package hitbtc
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/gorilla/websocket"
 	JsonRPC2 "github.com/sourcegraph/jsonrpc2"
 	JsonRPC2WS "github.com/sourcegraph/jsonrpc2/websocket"
@@ -28,70 +29,72 @@ type Notifications struct {
 
 func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Request) {
 	if request.Params != nil {
-		message := *request.Params
+		return
+	}
 
-		switch request.Method {
-		case "activeOrders":
-			var msg ReportsSnapshot
+	message := *request.Params
 
-			err := json.Unmarshal(message, &msg)
-			if err != nil {
-				r.ErrorFeed <- err
-			} else {
-				r.ReportsFeed <- msg
-			}
-		case "report":
-			var msg ReportsUpdate
+	switch request.Method {
+	case "activeOrders":
+		var msg ReportsSnapshot
 
-			err := json.Unmarshal(message, &msg)
+		err := json.Unmarshal(message, &msg)
+		if err != nil {
+			r.ErrorFeed <- err
+		} else {
+			r.ReportsFeed <- msg
+		}
+	case "report":
+		var msg ReportsUpdate
 
-			if err != nil {
-				r.ErrorFeed <- err
-			} else {
-				r.Notifications.ReportsFeed <- msg
-			}
+		err := json.Unmarshal(message, &msg)
 
-		case "snapshotCandles":
-			var msg CandlesSnapshot
+		if err != nil {
+			r.ErrorFeed <- err
+		} else {
+			r.Notifications.ReportsFeed <- msg
+		}
 
-			err := json.Unmarshal(message, &msg)
+	case "snapshotCandles":
+		var msg CandlesSnapshot
 
-			if err != nil {
-				r.ErrorFeed <- err
-			} else {
-				r.CandlesFeed[msg.Symbol] <- msg
-			}
-		case "updateCandles":
-			var msg CandlesUpdate
+		err := json.Unmarshal(message, &msg)
 
-			err := json.Unmarshal(message, &msg)
+		if err != nil {
+			r.ErrorFeed <- err
+		} else {
+			r.CandlesFeed[msg.Symbol] <- msg
+		}
+	case "updateCandles":
+		var msg CandlesUpdate
 
-			if err != nil {
-				r.ErrorFeed <- err
-			} else {
-				r.Notifications.CandlesFeed[msg.Symbol] <- msg
-			}
+		err := json.Unmarshal(message, &msg)
 
-		case "snapshotOrderbook":
-			var msg OrderbookSnapshot
+		if err != nil {
+			r.ErrorFeed <- err
+		} else {
+			r.Notifications.CandlesFeed[msg.Symbol] <- msg
+		}
 
-			err := json.Unmarshal(message, &msg)
+	case "snapshotOrderbook":
+		var msg OrderbookSnapshot
 
-			if err != nil {
-				r.ErrorFeed <- err
-			} else {
-				r.OrderbookFeed[msg.Symbol] <- msg
-			}
-		case "updateOrderbook":
-			var msg OrderbookUpdate
+		err := json.Unmarshal(message, &msg)
 
-			err := json.Unmarshal(message, &msg)
+		if err != nil {
+			r.ErrorFeed <- err
+		} else {
+			r.OrderbookFeed[msg.Symbol] <- msg
+		}
+	case "updateOrderbook":
+		var msg OrderbookUpdate
 
-			if err != nil {
-				r.ErrorFeed <- err
-			} else {
-				r.Notifications.OrderbookFeed[msg.Symbol] <- msg
-			}
+		err := json.Unmarshal(message, &msg)
+
+		if err != nil {
+			r.ErrorFeed <- err
+		} else {
+			r.Notifications.OrderbookFeed[msg.Symbol] <- msg
 		}
 	}
 }
@@ -135,14 +138,15 @@ func New() (instance *HitBTC, err error) {
 
 func (h *HitBTC) Authenticate(public, secret string) error {
 	request := struct {
-		PublicKey string `json:"pKey,required"`
-		SecretKey string `json:"sKey,required"`
-		Algorithm string `json:"algo,required"`
+		PublicKey string `json:"pKey"`
+		SecretKey string `json:"sKey"`
+		Algorithm string `json:"algo"`
 	}{
 		PublicKey: public,
 		SecretKey: secret,
 		Algorithm: "BASIC",
 	}
+
 	err := h.Request("login", &request, nil)
 	if err != nil {
 		return err
@@ -161,6 +165,7 @@ func (h *HitBTC) Close() {
 	for _, channel := range h.Feeds.CandlesFeed {
 		close(channel)
 	}
+
 	for _, channel := range h.Feeds.Notifications.CandlesFeed {
 		close(channel)
 	}
@@ -168,6 +173,7 @@ func (h *HitBTC) Close() {
 	for _, channel := range h.Feeds.OrderbookFeed {
 		close(channel)
 	}
+
 	for _, channel := range h.Feeds.Notifications.OrderbookFeed {
 		close(channel)
 	}
