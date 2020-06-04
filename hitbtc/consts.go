@@ -22,4 +22,4 @@ const (
 	ETH = "ETH"
 )
 
-const DemoSymbol = "BTC" + "USD"
+const DemoSymbol = BTC + USD
