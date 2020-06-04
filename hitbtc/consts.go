@@ -15,3 +15,11 @@ const (
 	Period15Minute = "M15"
 	Period1Minute  = "M1"
 )
+
+const (
+	USD = "USD"
+	BTC = "BTC"
+	ETH = "ETH"
+)
+
+const DemoSymbol = BTC + USD

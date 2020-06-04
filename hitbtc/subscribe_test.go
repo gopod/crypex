@@ -1,40 +1,39 @@
-package hitbtc
+package hitbtc_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ramezanius/crypex/hitbtc"
+	"github.com/ramezanius/crypex/hitbtc/tests"
 )
 
-const DemoSymbol = "BTC" + "USD"
-
 func TestSubscriptions(t *testing.T) {
-	var hitbtc = SetupHitBTC(t)
+	var instance = tests.SetupHitBTC(t)
 
 	t.Run("SubscribeReports", func(t *testing.T) {
-		_, snapshot, err := hitbtc.SubscribeReports()
+		_, snapshot, err := instance.SubscribeReports()
 		assert.NoError(t, err)
 
 		t.Run("ReportsSnapshot", func(t *testing.T) {
-			_ = <-snapshot
+			<-snapshot
 		})
 	})
-
 	t.Run("SubscribeCandles", func(t *testing.T) {
-		_, snapshot, err := hitbtc.SubscribeCandles(DemoSymbol, Period1Minute, 100)
+		_, snapshot, err := instance.SubscribeCandles(hitbtc.DemoSymbol, hitbtc.Period1Minute, 100)
 		assert.NoError(t, err)
 
 		t.Run("CandlesSnapshot", func(t *testing.T) {
-			_ = <-snapshot
+			<-snapshot
 		})
 	})
-
 	t.Run("SubscribeOrderbook", func(t *testing.T) {
-		_, snapshot, err := hitbtc.SubscribeOrderbook(DemoSymbol)
+		_, snapshot, err := instance.SubscribeOrderbook(hitbtc.DemoSymbol)
 		assert.NoError(t, err)
 
 		t.Run("OrderbookSnapshot", func(t *testing.T) {
-			_ = <-snapshot
+			<-snapshot
 		})
 	})
 }

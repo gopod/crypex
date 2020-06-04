@@ -1,8 +1,6 @@
 package hitbtc
 
-import (
-	"time"
-)
+import "time"
 
 type Report struct {
 	ID          int64     `json:"id,string"`
@@ -58,7 +56,8 @@ type Candles []Candle
 type CandlesUpdate CandlesResponse
 type CandlesSnapshot CandlesResponse
 
-func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (update <-chan CandlesUpdate, snapshot <-chan CandlesSnapshot, err error) {
+func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
+	update <-chan CandlesUpdate, snapshot <-chan CandlesSnapshot, err error) {
 	request := struct {
 		Limit  int64  `json:"limit,required"`
 		Period string `json:"period,required"`
@@ -128,7 +127,8 @@ type OrderbookSnapshot struct {
 	Sequence int64            `json:"sequence,required"` // used to see if update is the latest received
 }
 
-func (h *HitBTC) SubscribeOrderbook(symbol string) (update <-chan OrderbookUpdate, snapshot <-chan OrderbookSnapshot, err error) {
+func (h *HitBTC) SubscribeOrderbook(symbol string) (
+	update <-chan OrderbookUpdate, snapshot <-chan OrderbookSnapshot, err error) {
 	request := struct {
 		Symbol string `json:"symbol,required"`
 	}{
@@ -143,6 +143,7 @@ func (h *HitBTC) SubscribeOrderbook(symbol string) (update <-chan OrderbookUpdat
 	if h.Feeds.Notifications.OrderbookFeed[symbol] == nil {
 		h.Feeds.Notifications.OrderbookFeed[symbol] = make(chan OrderbookUpdate)
 	}
+
 	if h.Feeds.OrderbookFeed[symbol] == nil {
 		h.Feeds.OrderbookFeed[symbol] = make(chan OrderbookSnapshot)
 	}
