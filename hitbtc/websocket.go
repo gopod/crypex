@@ -28,7 +28,7 @@ type Notifications struct {
 }
 
 func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Request) {
-	if request.Params != nil {
+	if request.Params == nil {
 		return
 	}
 
