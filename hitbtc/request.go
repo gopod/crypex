@@ -1,22 +1,22 @@
 package hitbtc
 
 type Symbol struct {
-	ID    string `json:"id"`
-	Base  string `json:"baseCurrency"`
-	Quote string `json:"quoteCurrency"`
+	ID    string `json:"id,required"`
+	Base  string `json:"baseCurrency,required"`
+	Quote string `json:"quoteCurrency,required"`
 
-	TickSize             string `json:"tickSize"`
-	FeeCurrency          string `json:"feeCurrency"`
-	QuantityIncrement    string `json:"quantityIncrement"`
-	TakeLiquidityRate    string `json:"takeLiquidityRate"`
-	ProvideLiquidityRate string `json:"provideLiquidityRate"`
+	TickSize             string `json:"tickSize,required"`
+	FeeCurrency          string `json:"feeCurrency,required"`
+	QuantityIncrement    string `json:"quantityIncrement,required"`
+	TakeLiquidityRate    string `json:"takeLiquidityRate,required"`
+	ProvideLiquidityRate string `json:"provideLiquidityRate,required"`
 }
 
 type Symbols []Symbol
 
 func (h *HitBTC) GetSymbol(symbol string) (response *Symbol, err error) {
 	request := struct {
-		Symbol string `json:"symbol"`
+		Symbol string `json:"symbol,required"`
 	}{Symbol: symbol}
 
 	err = h.Request("getSymbol", &request, &response)
@@ -37,7 +37,7 @@ func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
 }
 
 type Balance struct {
-	Currency string `json:"currency"`
+	Currency string `json:"currency,required"`
 
 	Reserved  float64 `json:"reserved,string"`
 	Available float64 `json:"available,string"`

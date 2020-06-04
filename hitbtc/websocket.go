@@ -138,9 +138,9 @@ func New() (instance *HitBTC, err error) {
 
 func (h *HitBTC) Authenticate(public, secret string) error {
 	request := struct {
-		PublicKey string `json:"pKey"`
-		SecretKey string `json:"sKey"`
-		Algorithm string `json:"algo"`
+		PublicKey string `json:"pKey,required"`
+		SecretKey string `json:"sKey,required"`
+		Algorithm string `json:"algo,required"`
 	}{
 		PublicKey: public,
 		SecretKey: secret,
