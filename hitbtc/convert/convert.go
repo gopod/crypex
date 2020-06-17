@@ -7,12 +7,12 @@ import (
 )
 
 type Repository interface {
-	GetPrice(symbol string) (float64, error)
+	GetPrice(symbol string) float64
 
-	GetSymbol(symbol string) (*hitbtc.Symbol, error)
+	GetSymbol(symbol string) *hitbtc.Symbol
 }
 
-func ToSymbol(repo Repository, currency string) (symbol *hitbtc.Symbol) {
+func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol) {
 	baseCurrencies := []string{hitbtc.USD, hitbtc.BTC, hitbtc.ETH}
 
 	if sliceutil.Contains(baseCurrencies, currency) {
@@ -28,10 +28,9 @@ func ToSymbol(repo Repository, currency string) (symbol *hitbtc.Symbol) {
 		return
 	}
 
-	var err error
-
 	for _, base := range baseCurrencies {
-		if symbol, err = repo.GetSymbol(currency + base); err == nil {
+		symbol = cache.GetSymbol(currency + base)
+		if symbol.ID != "" {
 			break
 		}
 	}
@@ -39,53 +38,46 @@ func ToSymbol(repo Repository, currency string) (symbol *hitbtc.Symbol) {
 	return
 }
 
-func ToUSD(repo Repository, name string, value float64, pure bool) (float64, error) {
-	if value == 0 {
-		return 0, nil
+func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
+	switch {
+	case value == 0 || name == hitbtc.USD:
+		return value
+	case name == hitbtc.BTC || name == hitbtc.ETH:
+		BaseUsd := cache.GetPrice(name + hitbtc.USD)
+
+		return value * BaseUsd
 	}
 
-	if name == hitbtc.USD {
-		return value, nil
-	} else if name != "" {
-		if name == hitbtc.BTC || name == hitbtc.ETH {
-			if Usd, err := repo.GetPrice(name + hitbtc.USD); err == nil {
-				return value * Usd, nil
-			}
-		}
-	}
-
-	symbol := ToSymbol(repo, name)
+	symbol := ToSymbol(cache, name)
 
 	switch {
 	case symbol.Quote == hitbtc.USD:
 		if !pure {
-			if BaseEth, err := repo.GetPrice(symbol.Base + hitbtc.USD); err == nil {
-				return value * BaseEth, nil
-			}
+			BaseUsd := cache.GetPrice(symbol.Base + hitbtc.USD)
+
+			return value * BaseUsd
 		}
 
-		return value, nil
+		return value
 	case symbol.Quote == hitbtc.BTC:
-		if BaseBtc, err := repo.GetPrice(symbol.Base + hitbtc.BTC); err == nil {
-			BtcUsd, _ := repo.GetPrice(hitbtc.BTC + hitbtc.USD)
+		BaseBtc := cache.GetPrice(symbol.Base + hitbtc.BTC)
+		BtcUsd := cache.GetPrice(hitbtc.BTC + hitbtc.USD)
 
-			if !pure {
-				return value * BtcUsd * BaseBtc, nil
-			}
-
-			return value * BtcUsd, nil
+		if !pure {
+			return value * BtcUsd * BaseBtc
 		}
+
+		return value * BtcUsd
 	case symbol.Quote == hitbtc.ETH:
-		if BaseEth, err := repo.GetPrice(symbol.Base + hitbtc.ETH); err == nil {
-			EthUsd, _ := repo.GetPrice(hitbtc.ETH + hitbtc.USD)
+		BaseEth := cache.GetPrice(symbol.Base + hitbtc.ETH)
+		EthUsd := cache.GetPrice(hitbtc.ETH + hitbtc.USD)
 
-			if !pure {
-				return value * EthUsd * BaseEth, nil
-			}
-
-			return value * EthUsd, nil
+		if !pure {
+			return value * EthUsd * BaseEth
 		}
+
+		return value * EthUsd
 	}
 
-	return 0, nil
+	return value
 }
