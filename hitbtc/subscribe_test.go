@@ -10,7 +10,7 @@ import (
 )
 
 func TestSubscriptions(t *testing.T) {
-	var instance = tests.SetupHitBTC(t)
+	instance := tests.SetupHitBTC(t)
 
 	t.Run("SubscribeReports", func(t *testing.T) {
 		_, snapshot, err := instance.SubscribeReports()
