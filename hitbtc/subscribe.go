@@ -3,19 +3,23 @@ package hitbtc
 import "time"
 
 type Report struct {
-	ID          int64     `json:"id,string"`
-	Side        string    `json:"side,required"`
-	Type        string    `json:"type,required"`
-	Price       float64   `json:"price,string"`
-	Symbol      string    `json:"symbol,required"`
-	Status      string    `json:"status,required"`
-	Quantity    float64   `json:"quantity,string"`
-	StopPrice   bool      `json:"stopPrice,required"`
-	CreatedAt   time.Time `json:"createdAt,required"`
-	UpdatedAt   time.Time `json:"updatedAt,required"`
-	ExpireTime  time.Time `json:"expireTime,required"`
-	TimeInForce string    `json:"timeInForce,required"`
-	OrderID     string    `json:"clientOrderId,required"`
+	ID              int64     `json:"id,string"`
+	Side            string    `json:"side,required"`
+	Type            string    `json:"type,required"`
+	Price           float64   `json:"price,string"`
+	Symbol          string    `json:"symbol,required"`
+	Status          string    `json:"status,required"`
+	Quantity        float64   `json:"quantity,string"`
+	PostOnly        bool      `json:"postOnly,required"`
+	StopPrice       bool      `json:"stopPrice,required"`
+	CreatedAt       time.Time `json:"createdAt,required"`
+	UpdatedAt       time.Time `json:"updatedAt,required"`
+	ExpireTime      time.Time `json:"expireTime,required"`
+	ReportType      string    `json:"reportType,required"`
+	TimeInForce     string    `json:"timeInForce,required"`
+	CumQuantity     string    `json:"cumQuantity,required"`
+	OrderID         string    `json:"clientOrderId,required"`
+	OriginalOrderID string    `json:"originalRequestClientOrderId,required"`
 }
 
 type Reports []Report
