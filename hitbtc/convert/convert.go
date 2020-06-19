@@ -50,8 +50,8 @@ func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
 
 	symbol := ToSymbol(cache, name)
 
-	switch {
-	case symbol.Quote == hitbtc.USD:
+	switch symbol.Quote {
+	case hitbtc.USD:
 		if !pure {
 			BaseUsd := cache.GetPrice(symbol.Base+hitbtc.USD, hitbtc.Exchange)
 
@@ -59,7 +59,7 @@ func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
 		}
 
 		return value
-	case symbol.Quote == hitbtc.BTC:
+	case hitbtc.BTC:
 		BaseBtc := cache.GetPrice(symbol.Base+hitbtc.BTC, hitbtc.Exchange)
 		BtcUsd := cache.GetPrice(hitbtc.BTC+hitbtc.USD, hitbtc.Exchange)
 
@@ -68,7 +68,7 @@ func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
 		}
 
 		return value * BtcUsd
-	case symbol.Quote == hitbtc.ETH:
+	case hitbtc.ETH:
 		BaseEth := cache.GetPrice(symbol.Base+hitbtc.ETH, hitbtc.Exchange)
 		EthUsd := cache.GetPrice(hitbtc.ETH+hitbtc.USD, hitbtc.Exchange)
 
