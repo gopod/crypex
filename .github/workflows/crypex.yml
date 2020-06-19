@@ -31,6 +31,5 @@ jobs:
         run: |
           go get -v -t -d ./...
 
-      - name: Test hitbtc
-        run: go test -v .
-        working-directory: hitbtc
+      - name: Test exchanges
+        run: go test -v ./...
