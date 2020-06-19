@@ -11,35 +11,34 @@ import (
 
 type repository struct{}
 
-func (r repository) GetPrice(symbol string) (float64, error) {
+func (r *repository) GetPrice(symbol, _ string) float64 {
 	switch symbol {
 	case hitbtc.DemoSymbol:
-		return 10000, nil
+		return 10000
 	default:
-		return 0, nil
+		return 0
 	}
 }
 
-func (r repository) GetSymbol(symbol string) (*hitbtc.Symbol, error) {
+func (r *repository) GetSymbol(symbol, _ string) interface{} {
 	switch symbol {
 	case hitbtc.BTC:
 		return &hitbtc.Symbol{
 			Base:  "BTC",
 			Quote: "USD",
 			ID:    "BTC" + "USD",
-		}, nil
+		}
 	default:
-		return &hitbtc.Symbol{}, nil
+		return &hitbtc.Symbol{}
 	}
 }
 
 func TestConverters(t *testing.T) {
-	var repo repository
+	cache := &repository{}
 
 	t.Run("ToUSD", func(t *testing.T) {
-		value, err := convert.ToUSD(repo, hitbtc.BTC, 10, false)
+		value := convert.ToUSD(cache, hitbtc.BTC, 10, false)
 
-		assert.NoError(t, err)
 		assert.Equal(t, value, 10.0*10000.0)
 	})
 }
