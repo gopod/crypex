@@ -9,7 +9,7 @@ import (
 type Repository interface {
 	GetPrice(symbol string, exchange string) float64
 
-	GetSymbol(symbol string, exchange string) *hitbtc.Symbol
+	GetSymbol(symbol string, exchange string) interface{}
 }
 
 func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol) {
@@ -29,7 +29,7 @@ func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol) {
 	}
 
 	for _, base := range baseCurrencies {
-		symbol = cache.GetSymbol(currency+base, hitbtc.Exchange)
+		symbol = cache.GetSymbol(currency+base, hitbtc.Exchange).(*hitbtc.Symbol)
 		if symbol.ID != "" {
 			break
 		}
