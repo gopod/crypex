@@ -1,7 +1,6 @@
 package hitbtc_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,11 +41,7 @@ func TestRequests(t *testing.T) {
 			assert.Equal(t, order.Side, newRequest.Side)
 			assert.Equal(t, order.Price, newRequest.Price)
 			assert.Equal(t, order.Quantity, newRequest.Quantity)
-
-			fmt.Println(order.OrderID)
 		})
-
-		fmt.Println(newRequest.OrderID)
 
 		replaceRequest := &hitbtc.ReplaceOrder{
 			Price:    1000,
