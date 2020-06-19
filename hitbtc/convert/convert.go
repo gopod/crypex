@@ -7,9 +7,9 @@ import (
 )
 
 type Repository interface {
-	GetPrice(symbol string) float64
+	GetPrice(symbol string, exchange string) float64
 
-	GetSymbol(symbol string) *hitbtc.Symbol
+	GetSymbol(symbol string, exchange string) *hitbtc.Symbol
 }
 
 func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol) {
@@ -29,7 +29,7 @@ func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol) {
 	}
 
 	for _, base := range baseCurrencies {
-		symbol = cache.GetSymbol(currency + base)
+		symbol = cache.GetSymbol(currency+base, hitbtc.Exchange)
 		if symbol.ID != "" {
 			break
 		}
@@ -43,7 +43,7 @@ func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
 	case value == 0 || name == hitbtc.USD:
 		return value
 	case name == hitbtc.BTC || name == hitbtc.ETH:
-		BaseUsd := cache.GetPrice(name + hitbtc.USD)
+		BaseUsd := cache.GetPrice(name+hitbtc.USD, hitbtc.Exchange)
 
 		return value * BaseUsd
 	}
@@ -53,15 +53,15 @@ func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
 	switch {
 	case symbol.Quote == hitbtc.USD:
 		if !pure {
-			BaseUsd := cache.GetPrice(symbol.Base + hitbtc.USD)
+			BaseUsd := cache.GetPrice(symbol.Base+hitbtc.USD, hitbtc.Exchange)
 
 			return value * BaseUsd
 		}
 
 		return value
 	case symbol.Quote == hitbtc.BTC:
-		BaseBtc := cache.GetPrice(symbol.Base + hitbtc.BTC)
-		BtcUsd := cache.GetPrice(hitbtc.BTC + hitbtc.USD)
+		BaseBtc := cache.GetPrice(symbol.Base+hitbtc.BTC, hitbtc.Exchange)
+		BtcUsd := cache.GetPrice(hitbtc.BTC+hitbtc.USD, hitbtc.Exchange)
 
 		if !pure {
 			return value * BtcUsd * BaseBtc
@@ -69,8 +69,8 @@ func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
 
 		return value * BtcUsd
 	case symbol.Quote == hitbtc.ETH:
-		BaseEth := cache.GetPrice(symbol.Base + hitbtc.ETH)
-		EthUsd := cache.GetPrice(hitbtc.ETH + hitbtc.USD)
+		BaseEth := cache.GetPrice(symbol.Base+hitbtc.ETH, hitbtc.Exchange)
+		EthUsd := cache.GetPrice(hitbtc.ETH+hitbtc.USD, hitbtc.Exchange)
 
 		if !pure {
 			return value * EthUsd * BaseEth
