@@ -1,5 +1,21 @@
 package hitbtc
 
+import (
+	"time"
+
+	"github.com/ramezanius/crypex/hitbtc/helper"
+)
+
+const (
+	Buy  = "buy"
+	Sell = "sell"
+
+	Limit      = "limit"
+	Market     = "market"
+	StopLimit  = "stopLimit"
+	StopMarket = "stopMarket"
+)
+
 type Symbol struct {
 	ID    string `json:"id,required"`
 	Base  string `json:"baseCurrency,required"`
@@ -47,6 +63,67 @@ type Balances []Balance
 
 func (h *HitBTC) GetBalances() (response *Balances, err error) {
 	err = h.Request("getTradingBalance", nil, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+type NewOrder struct {
+	Side           string    `json:"side,required"`
+	Type           string    `json:"type,required"`
+	Price          float64   `json:"price,string"`
+	Symbol         string    `json:"symbol,required"`
+	Quantity       float64   `json:"quantity,string"`
+	StopPrice      float64   `json:"stopPrice,required"`
+	ExpireTime     time.Time `json:"expireTime,required"`
+	TimeInForce    string    `json:"timeInForce,required"`
+	OrderID        string    `json:"clientOrderId,required"`
+	PostOnly       bool      `json:"postOnly,required"`
+	StrictValidate bool      `json:"strictValidate,required"`
+}
+
+func (h *HitBTC) NewOrder(request *NewOrder) (response *Report, err error) {
+	if request.OrderID == "" {
+		request.OrderID = helper.GenerateUUID()
+	}
+
+	err = h.Request("newOrder", &request, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+func (h *HitBTC) CancelOrder(orderID string) (response *Report, err error) {
+	request := struct {
+		OrderID string `json:"clientOrderId,required"`
+	}{OrderID: orderID}
+
+	err = h.Request("cancelOrder", &request, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+type ReplaceOrder struct {
+	Price          float64 `json:"price,string"`
+	Quantity       float64 `json:"quantity,string"`
+	OrderID        string  `json:"clientOrderId,required"`
+	RequestOrderID string  `json:"requestClientId,required"`
+	StrictValidate bool    `json:"strictValidate,required"`
+}
+
+func (h *HitBTC) ReplaceOrder(request *ReplaceOrder) (response *Report, err error) {
+	if request.RequestOrderID == "" {
+		request.RequestOrderID = helper.GenerateUUID()
+	}
+
+	err = h.Request("cancelReplaceOrder", &request, &response)
 	if err != nil {
 		return nil, err
 	}
