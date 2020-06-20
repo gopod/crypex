@@ -12,10 +12,6 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
 
-    env:
-      HITBTC_PUBLIC_KEY: ${{ secrets.HITBTC_PUBLIC_KEY }}
-      HITBTC_SECRET_KEY: ${{ secrets.HITBTC_SECRET_KEY }}
-
     steps:
 
       - name: Set up Go 1.x
@@ -33,3 +29,6 @@ jobs:
 
       - name: Test exchanges
         run: go test -v ./...
+        env:
+          HITBTC_PUBLIC_KEY: ${{ secrets.HITBTC_PUBLIC_KEY }}
+          HITBTC_SECRET_KEY: ${{ secrets.HITBTC_SECRET_KEY }}
