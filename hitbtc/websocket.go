@@ -48,18 +48,15 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		var msg ReportsUpdate
 
 		err := json.Unmarshal(message, &msg)
-
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
 			r.Notifications.ReportsFeed <- msg
 		}
-
 	case "snapshotCandles":
 		var msg CandlesSnapshot
 
 		err := json.Unmarshal(message, &msg)
-
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
@@ -69,18 +66,15 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		var msg CandlesUpdate
 
 		err := json.Unmarshal(message, &msg)
-
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
 			r.Notifications.CandlesFeed[msg.Symbol] <- msg
 		}
-
 	case "snapshotOrderbook":
 		var msg OrderbookSnapshot
 
 		err := json.Unmarshal(message, &msg)
-
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
@@ -88,7 +82,6 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		}
 	case "updateOrderbook":
 		var msg OrderbookUpdate
-
 		err := json.Unmarshal(message, &msg)
 
 		if err != nil {
