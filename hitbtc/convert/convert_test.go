@@ -7,13 +7,14 @@ import (
 
 	"github.com/ramezanius/crypex/hitbtc"
 	"github.com/ramezanius/crypex/hitbtc/convert"
+	"github.com/ramezanius/crypex/hitbtc/tests"
 )
 
 type repository struct{}
 
 func (r *repository) GetPrice(symbol, _ string) float64 {
 	switch symbol {
-	case hitbtc.DemoSymbol:
+	case tests.Demo:
 		return 10000
 	default:
 		return 0

@@ -31,7 +31,7 @@ func TestRequests(t *testing.T) {
 
 			Side:   hitbtc.Buy,
 			Type:   hitbtc.Limit,
-			Symbol: hitbtc.DemoSymbol,
+			Symbol: tests.Demo,
 		}
 
 		t.Run("NewOrder", func(t *testing.T) {
