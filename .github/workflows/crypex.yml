@@ -28,7 +28,9 @@ jobs:
           go get -v -t -d ./...
 
       - name: Test exchanges
-        run: go test -v ./...
+        run: |
+          go get github.com/haya14busa/goverage
+          goverage -race -v -covermode=atomic -coverprofile=coverage.out ./...
         env:
           HITBTC_PUBLIC_KEY: ${{ secrets.HITBTC_PUBLIC_KEY }}
           HITBTC_SECRET_KEY: ${{ secrets.HITBTC_SECRET_KEY }}
