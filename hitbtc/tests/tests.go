@@ -9,6 +9,9 @@ import (
 	"github.com/ramezanius/crypex/hitbtc"
 )
 
+// Demo pair for testing
+const Demo = hitbtc.BTC + hitbtc.USD
+
 func SetupHitBTC(t *testing.T) (instance *hitbtc.HitBTC) {
 	var (
 		err error

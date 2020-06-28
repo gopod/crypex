@@ -2,6 +2,7 @@ package hitbtc
 
 import "time"
 
+// Report struct
 type Report struct {
 	ID              int64     `json:"id,string"`
 	Side            string    `json:"side,required"`
@@ -22,11 +23,16 @@ type Report struct {
 	OriginalOrderID string    `json:"originalRequestClientOrderId,required"`
 }
 
+// Reports struct
 type Reports []Report
 
+// Report update type
 type ReportsUpdate Report
+
+// Report snapshot type
 type ReportsSnapshot Reports
 
+// Subscribe to all reports [!Authenticate]
 func (h *HitBTC) SubscribeReports() (update <-chan ReportsUpdate, snapshot <-chan ReportsSnapshot, err error) {
 	err = h.Subscribe("subscribeReports", nil)
 	if err != nil {
@@ -39,12 +45,14 @@ func (h *HitBTC) SubscribeReports() (update <-chan ReportsUpdate, snapshot <-cha
 	return
 }
 
+// Candles response struct
 type CandlesResponse struct {
 	Data   Candles `json:"data,required"`
 	Symbol string  `json:"symbol,required"`
 	Period string  `json:"period,required"`
 }
 
+// Candle struct
 type Candle struct {
 	Min         float64   `json:"min,string"`
 	Max         float64   `json:"max,string"`
@@ -55,11 +63,16 @@ type Candle struct {
 	Timestamp   time.Time `json:"timestamp,required"`
 }
 
+// Candles struct
 type Candles []Candle
 
+// Candles update type
 type CandlesUpdate CandlesResponse
+
+// Candles snapshot type
 type CandlesSnapshot CandlesResponse
 
+// Subscribe to symbol candles
 func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
 	update <-chan CandlesUpdate, snapshot <-chan CandlesSnapshot, err error) {
 	request := struct {
@@ -94,6 +107,7 @@ func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
 	return
 }
 
+// Unsubscribe from symbol candles
 func (h *HitBTC) UnsubscribeCandles(symbol string) (err error) {
 	request := struct {
 		Symbol string `json:"symbol,required"`
@@ -118,25 +132,29 @@ func (h *HitBTC) UnsubscribeCandles(symbol string) (err error) {
 	return
 }
 
-type WSSubtypeTrade struct {
+// SubtypeTrade struct
+type SubtypeTrade struct {
 	Size  string `json:"size,required"`
 	Price string `json:"price,required"`
 }
 
+// Orderbook update struct
 type OrderbookUpdate struct {
-	Ask      []WSSubtypeTrade `json:"ask,required"`
-	Bid      []WSSubtypeTrade `json:"bid,required"`
-	Symbol   string           `json:"symbol,required"`
-	Sequence int64            `json:"sequence,required"` // used to see if the snapshot is the latest
+	Ask      []SubtypeTrade `json:"ask,required"`
+	Bid      []SubtypeTrade `json:"bid,required"`
+	Symbol   string         `json:"symbol,required"`
+	Sequence int64          `json:"sequence,required"` // used to see if the snapshot is the latest
 }
 
+// Orderbook snapshot struct
 type OrderbookSnapshot struct {
-	Ask      []WSSubtypeTrade `json:"ask,required"`
-	Bid      []WSSubtypeTrade `json:"bid,required"`
-	Symbol   string           `json:"symbol,required"`
-	Sequence int64            `json:"sequence,required"` // used to see if update is the latest received
+	Ask      []SubtypeTrade `json:"ask,required"`
+	Bid      []SubtypeTrade `json:"bid,required"`
+	Symbol   string         `json:"symbol,required"`
+	Sequence int64          `json:"sequence,required"` // used to see if update is the latest received
 }
 
+// Subscribe to symbol orderbook
 func (h *HitBTC) SubscribeOrderbook(symbol string) (
 	update <-chan OrderbookUpdate, snapshot <-chan OrderbookSnapshot, err error) {
 	request := struct {
@@ -167,6 +185,7 @@ func (h *HitBTC) SubscribeOrderbook(symbol string) (
 	return
 }
 
+// Unsubscribe from symbol orderbook
 func (h *HitBTC) UnsubscribeOrderbook(symbol string) (err error) {
 	request := struct {
 		Symbol string `json:"symbol,required"`

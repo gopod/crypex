@@ -6,12 +6,14 @@ import (
 	"github.com/ramezanius/crypex/hitbtc"
 )
 
+// Caching repository interface
 type Repository interface {
 	GetPrice(symbol string, exchange string) float64
 
 	GetSymbol(symbol string, exchange string) interface{}
 }
 
+// Convert an currency to available pair
 func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol) {
 	baseCurrencies := []string{hitbtc.USD, hitbtc.BTC, hitbtc.ETH}
 
@@ -38,6 +40,7 @@ func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol) {
 	return
 }
 
+// Convert any value of symbol(name) to USD
 func ToUSD(cache Repository, name string, value float64, pure bool) float64 {
 	switch {
 	case value == 0 || name == hitbtc.USD:

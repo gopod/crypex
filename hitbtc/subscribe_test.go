@@ -21,7 +21,7 @@ func TestSubscriptions(t *testing.T) {
 		})
 	})
 	t.Run("SubscribeCandles", func(t *testing.T) {
-		_, snapshot, err := instance.SubscribeCandles(hitbtc.DemoSymbol, hitbtc.Period1Minute, 100)
+		_, snapshot, err := instance.SubscribeCandles(tests.Demo, hitbtc.Period1Minute, 100)
 		assert.NoError(t, err)
 
 		t.Run("CandlesSnapshot", func(t *testing.T) {
@@ -29,7 +29,7 @@ func TestSubscriptions(t *testing.T) {
 		})
 	})
 	t.Run("SubscribeOrderbook", func(t *testing.T) {
-		_, snapshot, err := instance.SubscribeOrderbook(hitbtc.DemoSymbol)
+		_, snapshot, err := instance.SubscribeOrderbook(tests.Demo)
 		assert.NoError(t, err)
 
 		t.Run("OrderbookSnapshot", func(t *testing.T) {

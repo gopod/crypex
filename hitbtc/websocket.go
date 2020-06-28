@@ -10,8 +10,10 @@ import (
 	JsonRPC2WS "github.com/sourcegraph/jsonrpc2/websocket"
 )
 
+// Exchange websocket endpoint
 const Endpoint = "wss://api.hitbtc.com/api/2/ws"
 
+// Feeds channels struct
 type Feeds struct {
 	ErrorFeed chan error
 
@@ -22,12 +24,14 @@ type Feeds struct {
 	ReportsFeed   chan ReportsSnapshot
 }
 
+// Notifications feed struct
 type Notifications struct {
 	OrderbookFeed sync.Map
 	CandlesFeed   sync.Map
 	ReportsFeed   chan ReportsUpdate
 }
 
+// Websocket response handler
 func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Request) {
 	if request.Params == nil {
 		return
@@ -97,12 +101,14 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 	}
 }
 
+// HitBTC struct
 type HitBTC struct {
 	Feeds *Feeds
 
 	Conn *JsonRPC2.Conn
 }
 
+// Create a new hitbtc socket connection
 func New() (instance *HitBTC, err error) {
 	connection, _, err := websocket.DefaultDialer.Dial(Endpoint, nil)
 	if err != nil {
@@ -134,6 +140,7 @@ func New() (instance *HitBTC, err error) {
 	return
 }
 
+// Basic authenticate with public, and secret key
 func (h *HitBTC) Authenticate(public, secret string) error {
 	request := struct {
 		PublicKey string `json:"pKey,required"`
@@ -153,6 +160,7 @@ func (h *HitBTC) Authenticate(public, secret string) error {
 	return nil
 }
 
+// Close and delete all channels
 func (h *HitBTC) Close() {
 	_ = h.Conn.Close()
 
@@ -195,8 +203,10 @@ func (h *HitBTC) Close() {
 	h.Feeds.Notifications.OrderbookFeed = sync.Map{}
 }
 
+// Response type
 type Response bool
 
+// Subscribe to specific method
 func (h *HitBTC) Subscribe(method string, request interface{}) error {
 	var response Response
 
@@ -208,6 +218,7 @@ func (h *HitBTC) Subscribe(method string, request interface{}) error {
 	return nil
 }
 
+// Unsubscribe from specific method
 func (h *HitBTC) Request(method string, request interface{}, response interface{}) error {
 	err := h.Conn.Call(context.Background(), method, &request, &response)
 	if err != nil {
