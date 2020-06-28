@@ -9,6 +9,9 @@
 ![Licence](https://img.shields.io/github/license/ramezanius/crypex?label=Licence)
 
 ## Overview
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6a40649619f8441982250c4386217e7f)](https://app.codacy.com/manual/ramezanius/crypex?utm_source=github.com&utm_medium=referral&utm_content=ramezanius/crypex&utm_campaign=Badge_Grade_Dashboard)
+
 Crypex is a Go package for trading and communicating with [various](#Exchanges) exchange API for cryptocurrency assets!
 
 ### Exchanges
