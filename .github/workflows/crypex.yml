@@ -33,3 +33,11 @@ jobs:
         env:
           HITBTC_PUBLIC_KEY: ${{ secrets.HITBTC_PUBLIC_KEY }}
           HITBTC_SECRET_KEY: ${{ secrets.HITBTC_SECRET_KEY }}
+
+      - name: Send coverage
+        run: |
+          go get github.com/schrej/godacov
+          godacov -t "$CODACY_TOKEN" -r ./coverage.out -c "COMMIT_SHA"
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          CODACY_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
