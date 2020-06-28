@@ -16,9 +16,9 @@ Crypex is a Go package for trading and communicating with [various](#Exchanges) 
 The following cryptocurrency exchanges are supported:  
 (Web socket key: T = tickers, R = trades, B = orderbook, C = candles, O = reports)
 
-| Exchange   | Web Socket
-| ---------  | -----------
-| HitBTC     | B, C, O
+|Exchange|Web Socket
+|--------|----------
+|HitBTC  |B, C, O   
 
 ## Licence
 [MIT](LICENCE)
