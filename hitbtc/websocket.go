@@ -3,6 +3,7 @@ package hitbtc
 import (
 	"context"
 	"encoding/json"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	JsonRPC2 "github.com/sourcegraph/jsonrpc2"
@@ -16,15 +17,15 @@ type Feeds struct {
 
 	Notifications Notifications
 
+	OrderbookFeed sync.Map
+	CandlesFeed   sync.Map
 	ReportsFeed   chan ReportsSnapshot
-	CandlesFeed   map[string]chan CandlesSnapshot
-	OrderbookFeed map[string]chan OrderbookSnapshot
 }
 
 type Notifications struct {
+	OrderbookFeed sync.Map
+	CandlesFeed   sync.Map
 	ReportsFeed   chan ReportsUpdate
-	CandlesFeed   map[string]chan CandlesUpdate
-	OrderbookFeed map[string]chan OrderbookUpdate
 }
 
 func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Request) {
@@ -60,7 +61,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			r.CandlesFeed[msg.Symbol] <- msg
+			snapshot, _ := r.CandlesFeed.Load(msg.Symbol)
+			snapshot.(chan CandlesSnapshot) <- msg
 		}
 	case "updateCandles":
 		var msg CandlesUpdate
@@ -69,7 +71,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			r.Notifications.CandlesFeed[msg.Symbol] <- msg
+			update, _ := r.Notifications.CandlesFeed.Load(msg.Symbol)
+			update.(chan CandlesUpdate) <- msg
 		}
 	case "snapshotOrderbook":
 		var msg OrderbookSnapshot
@@ -78,7 +81,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			r.OrderbookFeed[msg.Symbol] <- msg
+			snapshot, _ := r.OrderbookFeed.Load(msg.Symbol)
+			snapshot.(chan OrderbookSnapshot) <- msg
 		}
 	case "updateOrderbook":
 		var msg OrderbookUpdate
@@ -87,7 +91,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			r.Notifications.OrderbookFeed[msg.Symbol] <- msg
+			update, _ := r.Notifications.OrderbookFeed.Load(msg.Symbol)
+			update.(chan OrderbookUpdate) <- msg
 		}
 	}
 }
@@ -108,14 +113,14 @@ func New() (instance *HitBTC, err error) {
 		ErrorFeed: make(chan error),
 
 		Notifications: Notifications{
+			OrderbookFeed: sync.Map{},
+			CandlesFeed:   sync.Map{},
 			ReportsFeed:   make(chan ReportsUpdate),
-			CandlesFeed:   make(map[string]chan CandlesUpdate),
-			OrderbookFeed: make(map[string]chan OrderbookUpdate),
 		},
 
+		OrderbookFeed: sync.Map{},
+		CandlesFeed:   sync.Map{},
 		ReportsFeed:   make(chan ReportsSnapshot),
-		CandlesFeed:   make(map[string]chan CandlesSnapshot),
-		OrderbookFeed: make(map[string]chan OrderbookSnapshot),
 	}
 
 	instance = &HitBTC{
@@ -155,29 +160,39 @@ func (h *HitBTC) Close() {
 	close(h.Feeds.ReportsFeed)
 	close(h.Feeds.Notifications.ReportsFeed)
 
-	for _, channel := range h.Feeds.CandlesFeed {
-		close(channel)
-	}
+	h.Feeds.CandlesFeed.Range(func(key, value interface{}) bool {
+		close(value.(chan CandlesSnapshot))
 
-	for _, channel := range h.Feeds.Notifications.CandlesFeed {
-		close(channel)
-	}
+		return true
+	})
 
-	for _, channel := range h.Feeds.OrderbookFeed {
-		close(channel)
-	}
+	h.Feeds.Notifications.CandlesFeed.Range(func(key, value interface{}) bool {
+		close(value.(chan CandlesUpdate))
 
-	for _, channel := range h.Feeds.Notifications.OrderbookFeed {
-		close(channel)
-	}
+		return true
+	})
+
+	h.Feeds.OrderbookFeed.Range(func(key, value interface{}) bool {
+		close(value.(chan OrderbookSnapshot))
+
+		return true
+	})
+
+	h.Feeds.Notifications.OrderbookFeed.Range(func(key, value interface{}) bool {
+		close(value.(chan OrderbookUpdate))
+
+		return true
+	})
 
 	h.Feeds.ErrorFeed = make(chan error)
+	h.Feeds.ReportsFeed = make(chan ReportsSnapshot)
+	h.Feeds.Notifications.ReportsFeed = make(chan ReportsUpdate)
 
-	h.Feeds.CandlesFeed = make(map[string]chan CandlesSnapshot)
-	h.Feeds.Notifications.CandlesFeed = make(map[string]chan CandlesUpdate)
+	h.Feeds.CandlesFeed = sync.Map{}
+	h.Feeds.Notifications.CandlesFeed = sync.Map{}
 
-	h.Feeds.OrderbookFeed = make(map[string]chan OrderbookSnapshot)
-	h.Feeds.Notifications.OrderbookFeed = make(map[string]chan OrderbookUpdate)
+	h.Feeds.OrderbookFeed = sync.Map{}
+	h.Feeds.Notifications.OrderbookFeed = sync.Map{}
 }
 
 type Response bool

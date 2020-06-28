@@ -77,16 +77,19 @@ func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
 		return nil, nil, err
 	}
 
-	if h.Feeds.Notifications.CandlesFeed[symbol] == nil {
-		h.Feeds.Notifications.CandlesFeed[symbol] = make(chan CandlesUpdate)
+	if _, ok := h.Feeds.CandlesFeed.Load(symbol); !ok {
+		h.Feeds.CandlesFeed.Store(symbol, make(chan CandlesSnapshot))
 	}
 
-	if h.Feeds.CandlesFeed[symbol] == nil {
-		h.Feeds.CandlesFeed[symbol] = make(chan CandlesSnapshot)
+	if _, ok := h.Feeds.Notifications.CandlesFeed.Load(symbol); !ok {
+		h.Feeds.Notifications.CandlesFeed.Store(symbol, make(chan CandlesUpdate))
 	}
 
-	update = h.Feeds.Notifications.CandlesFeed[symbol]
-	snapshot = h.Feeds.CandlesFeed[symbol]
+	snapshotChan, _ := h.Feeds.CandlesFeed.Load(symbol)
+	updateChan, _ := h.Feeds.Notifications.CandlesFeed.Load(symbol)
+
+	snapshot = snapshotChan.(chan CandlesSnapshot)
+	update = updateChan.(chan CandlesUpdate)
 
 	return
 }
@@ -103,11 +106,14 @@ func (h *HitBTC) UnsubscribeCandles(symbol string) (err error) {
 		return err
 	}
 
-	close(h.Feeds.Notifications.CandlesFeed[symbol])
-	delete(h.Feeds.Notifications.CandlesFeed, symbol)
+	snapshot, _ := h.Feeds.CandlesFeed.Load(symbol)
+	update, _ := h.Feeds.Notifications.CandlesFeed.Load(symbol)
 
-	close(h.Feeds.CandlesFeed[symbol])
-	delete(h.Feeds.CandlesFeed, symbol)
+	close(snapshot.(chan CandlesSnapshot))
+	close(update.(chan CandlesUpdate))
+
+	h.Feeds.Notifications.CandlesFeed.Delete(symbol)
+	h.Feeds.CandlesFeed.Delete(symbol)
 
 	return
 }
@@ -144,16 +150,19 @@ func (h *HitBTC) SubscribeOrderbook(symbol string) (
 		return nil, nil, err
 	}
 
-	if h.Feeds.Notifications.OrderbookFeed[symbol] == nil {
-		h.Feeds.Notifications.OrderbookFeed[symbol] = make(chan OrderbookUpdate)
+	if _, ok := h.Feeds.OrderbookFeed.Load(symbol); !ok {
+		h.Feeds.OrderbookFeed.Store(symbol, make(chan OrderbookSnapshot))
 	}
 
-	if h.Feeds.OrderbookFeed[symbol] == nil {
-		h.Feeds.OrderbookFeed[symbol] = make(chan OrderbookSnapshot)
+	if _, ok := h.Feeds.Notifications.OrderbookFeed.Load(symbol); !ok {
+		h.Feeds.Notifications.OrderbookFeed.Store(symbol, make(chan OrderbookUpdate))
 	}
 
-	update = h.Feeds.Notifications.OrderbookFeed[symbol]
-	snapshot = h.Feeds.OrderbookFeed[symbol]
+	snapshotChan, _ := h.Feeds.OrderbookFeed.Load(symbol)
+	updateChan, _ := h.Feeds.Notifications.OrderbookFeed.Load(symbol)
+
+	snapshot = snapshotChan.(chan OrderbookSnapshot)
+	update = updateChan.(chan OrderbookUpdate)
 
 	return
 }
@@ -170,11 +179,14 @@ func (h *HitBTC) UnsubscribeOrderbook(symbol string) (err error) {
 		return err
 	}
 
-	close(h.Feeds.Notifications.OrderbookFeed[symbol])
-	delete(h.Feeds.Notifications.OrderbookFeed, symbol)
+	snapshot, _ := h.Feeds.OrderbookFeed.Load(symbol)
+	update, _ := h.Feeds.Notifications.OrderbookFeed.Load(symbol)
 
-	close(h.Feeds.OrderbookFeed[symbol])
-	delete(h.Feeds.OrderbookFeed, symbol)
+	close(snapshot.(chan OrderbookSnapshot))
+	close(update.(chan OrderbookUpdate))
+
+	h.Feeds.Notifications.OrderbookFeed.Delete(symbol)
+	h.Feeds.OrderbookFeed.Delete(symbol)
 
 	return
 }
