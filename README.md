@@ -8,7 +8,6 @@
 ![CodeQuality](https://img.shields.io/codacy/grade/c63954853a924973b78daa8c411c6aad?label=Code%20quality)
 ![Licence](https://img.shields.io/github/license/ramezanius/crypex?label=Licence)
 
-
 ## Overview
 Crypex is a Go package for trading and communicating with [various](#Exchanges) exchange API for cryptocurrency assets!
 
@@ -16,9 +15,9 @@ Crypex is a Go package for trading and communicating with [various](#Exchanges) 
 The following cryptocurrency exchanges are supported:  
 (Web socket key: T = tickers, R = trades, B = orderbook, C = candles, O = reports)
 
-|Exchange|Web Socket
-|--------|----------
-|HitBTC  |B, C, O   
+| Exchange   | Web Socket
+| --------   | ----------
+| HitBTC     | B, C, O
 
 ## Licence
 [MIT](LICENCE)
