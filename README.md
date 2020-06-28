@@ -15,9 +15,54 @@ Crypex is a Go package for trading and communicating with [various](#Exchanges) 
 The following cryptocurrency exchanges are supported:  
 (Web socket key: T = tickers, R = trades, B = orderbook, C = candles, O = reports)
 
-| Exchange   | Web Socket
-| --------   | ----------
-| HitBTC     | B, C, O
+Exchange | Methods
+--- | ---
+*HitBTC* | `B`, `C`, `O`
+
+## Quick examples
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/ramezanius/crypex/hitbtc"
+)
+
+const (
+	Public = "YOUR_PUBLIC_KEY"
+	Secret = "YOUR_SECRET_KEY"
+)
+
+func main() {
+	// New hitbtc client
+	client, err := hitbtc.New()
+	if err != nil {
+		panic(err)
+	}
+
+	// Authenticate
+	err = client.Authenticate(Public, Secret)
+	if err != nil {
+		panic(err)
+	}
+
+	// Get balances
+	balances, err := client.GetBalances()
+	fmt.Println(err, balances)
+
+	// Subscribe and consume data
+	updateFeed, snapshotFeed, err := client.SubscribeCandles("BTCUSD", "M1", 100)
+
+	snapshot := <-snapshotFeed
+	fmt.Println(snapshot)
+
+	for {
+		update := <-updateFeed
+		fmt.Println(update)
+	}
+}
+```
 
 ## Licence
 [MIT](LICENCE)
