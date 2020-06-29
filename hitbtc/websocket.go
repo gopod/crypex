@@ -65,7 +65,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			snapshot, _ := r.CandlesFeed.Load(msg.Symbol)
+			snapshot, _ := r.CandlesFeed.LoadOrStore(
+				msg.Symbol, make(chan CandlesSnapshot))
 			snapshot.(chan CandlesSnapshot) <- msg
 		}
 	case "updateCandles":
@@ -75,7 +76,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			update, _ := r.Notifications.CandlesFeed.Load(msg.Symbol)
+			update, _ := r.Notifications.CandlesFeed.LoadOrStore(
+				msg.Symbol, make(chan CandlesUpdate))
 			update.(chan CandlesUpdate) <- msg
 		}
 	case "snapshotOrderbook":
@@ -85,7 +87,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			snapshot, _ := r.OrderbookFeed.Load(msg.Symbol)
+			snapshot, _ := r.OrderbookFeed.LoadOrStore(
+				msg.Symbol, make(chan OrderbookSnapshot))
 			snapshot.(chan OrderbookSnapshot) <- msg
 		}
 	case "updateOrderbook":
@@ -95,7 +98,8 @@ func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Re
 		if err != nil {
 			r.ErrorFeed <- err
 		} else {
-			update, _ := r.Notifications.OrderbookFeed.Load(msg.Symbol)
+			update, _ := r.Notifications.OrderbookFeed.LoadOrStore(
+				msg.Symbol, make(chan OrderbookUpdate))
 			update.(chan OrderbookUpdate) <- msg
 		}
 	}
