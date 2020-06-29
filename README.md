@@ -42,7 +42,8 @@ func main() {
 	}
 
 	// Authenticate
-	err = client.Authenticate(Public, Secret)
+	client.PublicKey, client.SecretKey = Public, Secret
+	err = client.Authenticate()
 	if err != nil {
 		panic(err)
 	}
