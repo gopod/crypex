@@ -33,74 +33,71 @@ type Notifications struct {
 
 // Websocket response handler
 func (r *Feeds) Handle(_ context.Context, _ *JsonRPC2.Conn, request *JsonRPC2.Request) {
-	if request.Params == nil {
-		return
-	}
-
 	message := *request.Params
+	if request.Params != nil {
+		switch request.Method {
+		case "activeOrders":
+			var msg ReportsSnapshot
 
-	switch request.Method {
-	case "activeOrders":
-		var msg ReportsSnapshot
+			err := json.Unmarshal(message, &msg)
+			if err != nil {
+				r.ErrorFeed <- err
+			} else {
+				r.ReportsFeed <- msg
+			}
+		case "report":
+			var msg ReportsUpdate
 
-		err := json.Unmarshal(message, &msg)
-		if err != nil {
-			r.ErrorFeed <- err
-		} else {
-			r.ReportsFeed <- msg
-		}
-	case "report":
-		var msg ReportsUpdate
+			err := json.Unmarshal(message, &msg)
+			if err != nil {
+				r.ErrorFeed <- err
+			} else {
+				r.Notifications.ReportsFeed <- msg
+			}
+		case "snapshotCandles":
+			var msg CandlesSnapshot
 
-		err := json.Unmarshal(message, &msg)
-		if err != nil {
-			r.ErrorFeed <- err
-		} else {
-			r.Notifications.ReportsFeed <- msg
-		}
-	case "snapshotCandles":
-		var msg CandlesSnapshot
+			err := json.Unmarshal(message, &msg)
+			if err != nil {
+				r.ErrorFeed <- err
+			} else {
+				snapshot, _ := r.CandlesFeed.LoadOrStore(
+					msg.Symbol, make(chan CandlesSnapshot))
+				snapshot.(chan CandlesSnapshot) <- msg
+			}
+		case "updateCandles":
+			var msg CandlesUpdate
 
-		err := json.Unmarshal(message, &msg)
-		if err != nil {
-			r.ErrorFeed <- err
-		} else {
-			snapshot, _ := r.CandlesFeed.LoadOrStore(
-				msg.Symbol, make(chan CandlesSnapshot))
-			snapshot.(chan CandlesSnapshot) <- msg
-		}
-	case "updateCandles":
-		var msg CandlesUpdate
+			err := json.Unmarshal(message, &msg)
+			if err != nil {
+				r.ErrorFeed <- err
+			} else {
+				update, _ := r.Notifications.CandlesFeed.LoadOrStore(
+					msg.Symbol, make(chan CandlesUpdate))
+				update.(chan CandlesUpdate) <- msg
+			}
+		case "snapshotOrderbook":
+			var msg OrderbookSnapshot
 
-		err := json.Unmarshal(message, &msg)
-		if err != nil {
-			r.ErrorFeed <- err
-		} else {
-			update, _ := r.Notifications.CandlesFeed.LoadOrStore(
-				msg.Symbol, make(chan CandlesUpdate))
-			update.(chan CandlesUpdate) <- msg
-		}
-	case "snapshotOrderbook":
-		var msg OrderbookSnapshot
+			err := json.Unmarshal(message, &msg)
+			if err != nil {
+				r.ErrorFeed <- err
+			} else {
+				snapshot, _ := r.OrderbookFeed.LoadOrStore(
+					msg.Symbol, make(chan OrderbookSnapshot))
+				snapshot.(chan OrderbookSnapshot) <- msg
+			}
+		case "updateOrderbook":
+			var msg OrderbookUpdate
+			err := json.Unmarshal(message, &msg)
 
-		err := json.Unmarshal(message, &msg)
-		if err != nil {
-			r.ErrorFeed <- err
-		} else {
-			snapshot, _ := r.OrderbookFeed.LoadOrStore(
-				msg.Symbol, make(chan OrderbookSnapshot))
-			snapshot.(chan OrderbookSnapshot) <- msg
-		}
-	case "updateOrderbook":
-		var msg OrderbookUpdate
-		err := json.Unmarshal(message, &msg)
-
-		if err != nil {
-			r.ErrorFeed <- err
-		} else {
-			update, _ := r.Notifications.OrderbookFeed.LoadOrStore(
-				msg.Symbol, make(chan OrderbookUpdate))
-			update.(chan OrderbookUpdate) <- msg
+			if err != nil {
+				r.ErrorFeed <- err
+			} else {
+				update, _ := r.Notifications.OrderbookFeed.LoadOrStore(
+					msg.Symbol, make(chan OrderbookUpdate))
+				update.(chan OrderbookUpdate) <- msg
+			}
 		}
 	}
 }
@@ -147,7 +144,7 @@ func New() (instance *HitBTC, err error) {
 }
 
 // Basic authenticate with public, and secret key
-func (h *HitBTC) Authenticate() error {
+func (h *HitBTC) Authenticate() (err error) {
 	request := struct {
 		PublicKey string `json:"pKey,required"`
 		SecretKey string `json:"sKey,required"`
@@ -158,12 +155,17 @@ func (h *HitBTC) Authenticate() error {
 		Algorithm: "BASIC",
 	}
 
-	return h.Request("login", &request, nil)
+	err = h.Request("login", &request, nil)
+
+	return
 }
 
 // Close and delete all channels
-func (h *HitBTC) Close() {
-	_ = h.Conn.Close()
+func (h *HitBTC) Close() (err error) {
+	err = h.Conn.Close()
+	if err != nil {
+		return
+	}
 
 	close(h.Feeds.ErrorFeed)
 	close(h.Feeds.ReportsFeed)
@@ -202,29 +204,25 @@ func (h *HitBTC) Close() {
 
 	h.Feeds.OrderbookFeed = sync.Map{}
 	h.Feeds.Notifications.OrderbookFeed = sync.Map{}
+
+	return
 }
 
 // Response type
 type Response bool
 
 // Subscribe to specific method
-func (h *HitBTC) Subscribe(method string, request interface{}) error {
+func (h *HitBTC) Subscribe(method string, request interface{}) (err error) {
 	var response Response
 
-	err := h.Conn.Call(context.Background(), method, &request, &response)
-	if err != nil {
-		return err
-	}
+	err = h.Conn.Call(context.Background(), method, &request, &response)
 
-	return nil
+	return
 }
 
 // Call a method in websocket connection
-func (h *HitBTC) Request(method string, request, response interface{}) error {
-	err := h.Conn.Call(context.Background(), method, &request, &response)
-	if err != nil {
-		return err
-	}
+func (h *HitBTC) Request(method string, request, response interface{}) (err error) {
+	err = h.Conn.Call(context.Background(), method, &request, &response)
 
-	return nil
+	return
 }

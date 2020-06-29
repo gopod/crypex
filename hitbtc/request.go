@@ -42,7 +42,7 @@ func (h *HitBTC) GetSymbol(symbol string) (response *Symbol, err error) {
 
 	err = h.Request("getSymbol", &request, &response)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return
@@ -52,7 +52,7 @@ func (h *HitBTC) GetSymbol(symbol string) (response *Symbol, err error) {
 func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
 	err = h.Request("getSymbols", nil, &response)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return
@@ -73,7 +73,7 @@ type Balances []Balance
 func (h *HitBTC) GetBalances() (response *Balances, err error) {
 	err = h.Request("getTradingBalance", nil, &response)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return
@@ -102,7 +102,7 @@ func (h *HitBTC) NewOrder(request *NewOrder) (response *Report, err error) {
 
 	err = h.Request("newOrder", &request, &response)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return
@@ -116,7 +116,7 @@ func (h *HitBTC) CancelOrder(orderID string) (response *Report, err error) {
 
 	err = h.Request("cancelOrder", &request, &response)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return
@@ -139,7 +139,7 @@ func (h *HitBTC) ReplaceOrder(request *ReplaceOrder) (response *Report, err erro
 
 	err = h.Request("cancelReplaceOrder", &request, &response)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	return

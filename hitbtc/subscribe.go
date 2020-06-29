@@ -36,7 +36,7 @@ type ReportsSnapshot Reports
 func (h *HitBTC) SubscribeReports() (update <-chan ReportsUpdate, snapshot <-chan ReportsSnapshot, err error) {
 	err = h.Subscribe("subscribeReports", nil)
 	if err != nil {
-		return nil, nil, err
+		return
 	}
 
 	update = h.Feeds.Notifications.ReportsFeed
@@ -87,7 +87,7 @@ func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
 
 	err = h.Subscribe("subscribeCandles", &request)
 	if err != nil {
-		return nil, nil, err
+		return
 	}
 
 	if _, ok := h.Feeds.CandlesFeed.Load(symbol); !ok {
@@ -165,7 +165,7 @@ func (h *HitBTC) SubscribeOrderbook(symbol string) (
 
 	err = h.Subscribe("subscribeOrderbook", &request)
 	if err != nil {
-		return nil, nil, err
+		return
 	}
 
 	if _, ok := h.Feeds.OrderbookFeed.Load(symbol); !ok {

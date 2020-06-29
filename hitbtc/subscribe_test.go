@@ -28,6 +28,10 @@ func TestSubscriptions(t *testing.T) {
 			<-snapshot
 		})
 	})
+	t.Run("UnsubscribeCandles", func(t *testing.T) {
+		err := instance.UnsubscribeCandles(tests.Demo)
+		assert.NoError(t, err)
+	})
 	t.Run("SubscribeOrderbook", func(t *testing.T) {
 		_, snapshot, err := instance.SubscribeOrderbook(tests.Demo)
 		assert.NoError(t, err)
@@ -35,5 +39,9 @@ func TestSubscriptions(t *testing.T) {
 		t.Run("OrderbookSnapshot", func(t *testing.T) {
 			<-snapshot
 		})
+	})
+	t.Run("UnsubscribeOrderbook", func(t *testing.T) {
+		err := instance.UnsubscribeOrderbook(tests.Demo)
+		assert.NoError(t, err)
 	})
 }
