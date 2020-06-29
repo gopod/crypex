@@ -110,6 +110,8 @@ type HitBTC struct {
 	Feeds *Feeds
 
 	Conn *JsonRPC2.Conn
+
+	PublicKey, SecretKey string
 }
 
 // Create a new hitbtc socket connection
@@ -145,23 +147,18 @@ func New() (instance *HitBTC, err error) {
 }
 
 // Basic authenticate with public, and secret key
-func (h *HitBTC) Authenticate(public, secret string) error {
+func (h *HitBTC) Authenticate() error {
 	request := struct {
 		PublicKey string `json:"pKey,required"`
 		SecretKey string `json:"sKey,required"`
 		Algorithm string `json:"algo,required"`
 	}{
-		PublicKey: public,
-		SecretKey: secret,
+		PublicKey: h.PublicKey,
+		SecretKey: h.SecretKey,
 		Algorithm: "BASIC",
 	}
 
-	err := h.Request("login", &request, nil)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return h.Request("login", &request, nil)
 }
 
 // Close and delete all channels
@@ -222,8 +219,8 @@ func (h *HitBTC) Subscribe(method string, request interface{}) error {
 	return nil
 }
 
-// Unsubscribe from specific method
-func (h *HitBTC) Request(method string, request interface{}, response interface{}) error {
+// Call a method in websocket connection
+func (h *HitBTC) Request(method string, request, response interface{}) error {
 	err := h.Conn.Call(context.Background(), method, &request, &response)
 	if err != nil {
 		return err

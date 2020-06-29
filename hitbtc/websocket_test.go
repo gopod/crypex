@@ -14,7 +14,7 @@ func TestHitBTC(t *testing.T) {
 	instance := tests.SetupHitBTC(t)
 
 	t.Run("Authenticate", func(t *testing.T) {
-		err = instance.Authenticate("pubKey", "secKey")
-		assert.Error(t, err)
+		err = instance.Authenticate()
+		assert.NoError(t, err)
 	})
 }

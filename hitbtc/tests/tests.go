@@ -24,7 +24,8 @@ func SetupHitBTC(t *testing.T) (instance *hitbtc.HitBTC) {
 	assert.NoError(t, err)
 
 	if publicKey != "" && secretKey != "" {
-		err = instance.Authenticate(publicKey, secretKey)
+		instance.PublicKey, instance.SecretKey = publicKey, secretKey
+		err = instance.Authenticate()
 		assert.NoError(t, err)
 	}
 
