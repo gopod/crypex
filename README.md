@@ -1,12 +1,12 @@
 <img src=".github/crypex.png" alt="Crypex Logo" />
 
-![Build](https://img.shields.io/github/workflow/status/ramezanius/crypex/Crypex?label=Build)
-![Coverage](https://img.shields.io/codacy/coverage/6996e8a7fdb845eea86f02740f57e94b?label=Coverage)
-![Issues](https://img.shields.io/github/issues/ramezanius/crypex?label=Issues)
-![PullRequests](https://img.shields.io/github/issues-pr/ramezanius/crypex?label=Pull%20requests)
-![CodeSize](https://img.shields.io/github/languages/code-size/ramezanius/crypex?label=Code%20size)
-![CodeQuality](https://img.shields.io/codacy/grade/6996e8a7fdb845eea86f02740f57e94b?label=Code%20quality)
-![Licence](https://img.shields.io/github/license/ramezanius/crypex?label=Licence)
+![Build](https://img.shields.io/github/workflow/status/ramezanius/crypex/Crypex?label=build)
+![Coverage](https://img.shields.io/codacy/coverage/6996e8a7fdb845eea86f02740f57e94b?label=coverage)
+![Issues](https://img.shields.io/github/issues/ramezanius/crypex?label=issues)
+![PullRequests](https://img.shields.io/github/issues-pr/ramezanius/crypex?label=pull%20requests)
+![CodeSize](https://img.shields.io/github/languages/code-size/ramezanius/crypex?label=code%20size)
+![CodeQuality](https://img.shields.io/codacy/grade/6996e8a7fdb845eea86f02740f57e94b?label=code%20quality)
+![Licence](https://img.shields.io/github/license/ramezanius/crypex?label=licence)
 
 ## Overview
 Crypex is a Go package for trading and communicating with [various](#Exchanges) exchange API for cryptocurrency assets!
