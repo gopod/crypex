@@ -18,7 +18,7 @@ Exchanges | Supported Methods
 :-:|:-:
 HitBTC | `Orderbook`, `Candles`, `Reports`
 
-## Quick examples
+### Quick examples
 ```go
 package main
 
