@@ -18,14 +18,7 @@ func TestSubscriptions(t *testing.T) {
 		assert.NoError(t, err)
 
 		t.Run("Reports", func(t *testing.T) {
-			for stay, timeout := true, time.After(hitbtc.Timeout); stay; {
-				select {
-				case <-timeout:
-					stay = false
-				case _, ok := <-reports:
-					assert.True(t, ok)
-				}
-			}
+			receiveWithTimeout(t, reports)
 		})
 	})
 	t.Run("SubscribeCandles", func(t *testing.T) {
@@ -34,14 +27,7 @@ func TestSubscriptions(t *testing.T) {
 		assert.NoError(t, err)
 
 		t.Run("Candles", func(t *testing.T) {
-			for stay, timeout := true, time.After(hitbtc.Timeout); stay; {
-				select {
-				case <-timeout:
-					stay = false
-				case _, ok := <-candles:
-					assert.True(t, ok)
-				}
-			}
+			receiveWithTimeout(t, candles)
 		})
 	})
 	t.Run("UnsubscribeCandles", func(t *testing.T) {
@@ -53,18 +39,22 @@ func TestSubscriptions(t *testing.T) {
 		assert.NoError(t, err)
 
 		t.Run("Orderbook", func(t *testing.T) {
-			for stay, timeout := true, time.After(hitbtc.Timeout); stay; {
-				select {
-				case <-timeout:
-					stay = false
-				case _, ok := <-orderbook:
-					assert.True(t, ok)
-				}
-			}
+			receiveWithTimeout(t, orderbook)
 		})
 	})
 	t.Run("UnsubscribeOrderbook", func(t *testing.T) {
 		err := instance.UnsubscribeOrderbook(tests.Demo)
 		assert.NoError(t, err)
 	})
+}
+
+func receiveWithTimeout(t *testing.T, ch <-chan interface{}) {
+	for stay, timeout := true, time.After(hitbtc.Timeout); stay; {
+		select {
+		case <-timeout:
+			stay = false
+		case _, ok := <-ch:
+			assert.True(t, ok)
+		}
+	}
 }
