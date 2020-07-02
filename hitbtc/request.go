@@ -34,7 +34,7 @@ type Symbol struct {
 // Symbols struct
 type Symbols []Symbol
 
-// Get specific symbol
+// GetSymbol get specific symbol
 func (h *HitBTC) GetSymbol(symbol string) (response *Symbol, err error) {
 	request := struct {
 		Symbol string `json:"symbol,required"`
@@ -48,7 +48,7 @@ func (h *HitBTC) GetSymbol(symbol string) (response *Symbol, err error) {
 	return
 }
 
-// Get exchange symbols
+// GetSymbols get exchange symbols
 func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
 	err = h.Request("getSymbols", nil, &response)
 	if err != nil {
@@ -69,7 +69,7 @@ type Balance struct {
 // Balances struct
 type Balances []Balance
 
-// Get user balances on exchange [!Authenticate]
+// GetBalances get user balances on exchange @authenticate
 func (h *HitBTC) GetBalances() (response *Balances, err error) {
 	err = h.Request("getTradingBalance", nil, &response)
 	if err != nil {
@@ -79,7 +79,7 @@ func (h *HitBTC) GetBalances() (response *Balances, err error) {
 	return
 }
 
-// New order request struct
+// NewOrder struct
 type NewOrder struct {
 	Side           string    `json:"side,required"`
 	Type           string    `json:"type,required"`
@@ -94,7 +94,7 @@ type NewOrder struct {
 	StrictValidate bool      `json:"strictValidate,required"`
 }
 
-// Place a new order [!Authenticate]
+// NewOrder place a new order @authenticate
 func (h *HitBTC) NewOrder(request *NewOrder) (response *Report, err error) {
 	if request.OrderID == "" {
 		request.OrderID = helper.GenerateUUID()
@@ -108,7 +108,7 @@ func (h *HitBTC) NewOrder(request *NewOrder) (response *Report, err error) {
 	return
 }
 
-// Cancel an order [!Authenticate]
+// CancelOrder cancel an order @authenticate
 func (h *HitBTC) CancelOrder(orderID string) (response *Report, err error) {
 	request := struct {
 		OrderID string `json:"clientOrderId,required"`
@@ -122,7 +122,7 @@ func (h *HitBTC) CancelOrder(orderID string) (response *Report, err error) {
 	return
 }
 
-// Replace order request struct
+// ReplaceOrder struct
 type ReplaceOrder struct {
 	Price          float64 `json:"price,string"`
 	Quantity       float64 `json:"quantity,string"`
@@ -131,7 +131,7 @@ type ReplaceOrder struct {
 	StrictValidate bool    `json:"strictValidate,required"`
 }
 
-// Replace a new order [!Authenticate]
+// ReplaceOrder replace a new order @authenticate
 func (h *HitBTC) ReplaceOrder(request *ReplaceOrder) (response *Report, err error) {
 	if request.RequestOrderID == "" {
 		request.RequestOrderID = helper.GenerateUUID()

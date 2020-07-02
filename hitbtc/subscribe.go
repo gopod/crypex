@@ -23,33 +23,19 @@ type Report struct {
 	OriginalOrderID string    `json:"originalRequestClientOrderId,required"`
 }
 
-// Reports struct
-type Reports []Report
+// ReportResponse struct
+type ReportResponse Report
 
-// Report update type
-type ReportsUpdate Report
-
-// Report snapshot type
-type ReportsSnapshot Reports
-
-// Subscribe to all reports [!Authenticate]
-func (h *HitBTC) SubscribeReports() (update <-chan ReportsUpdate, snapshot <-chan ReportsSnapshot, err error) {
+// SubscribeReports Subscribe to all reports [!Authenticate]
+func (h *HitBTC) SubscribeReports() (reports <-chan interface{}, err error) {
 	err = h.Subscribe("subscribeReports", nil)
 	if err != nil {
 		return
 	}
 
-	update = h.Feeds.Notifications.ReportsFeed
-	snapshot = h.Feeds.ReportsFeed
+	reports = h.Feeds.Sub(ReportsFeed)
 
 	return
-}
-
-// Candles response struct
-type CandlesResponse struct {
-	Data   Candles `json:"data,required"`
-	Symbol string  `json:"symbol,required"`
-	Period string  `json:"period,required"`
 }
 
 // Candle struct
@@ -66,15 +52,15 @@ type Candle struct {
 // Candles struct
 type Candles []Candle
 
-// Candles update type
-type CandlesUpdate CandlesResponse
+// CandlesResponse struct
+type CandlesResponse struct {
+	Data   Candles `json:"data,required"`
+	Symbol string  `json:"symbol,required"`
+	Period string  `json:"period,required"`
+}
 
-// Candles snapshot type
-type CandlesSnapshot CandlesResponse
-
-// Subscribe to symbol candles
-func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
-	update <-chan CandlesUpdate, snapshot <-chan CandlesSnapshot, err error) {
+// SubscribeCandles subscribe to symbol candles
+func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (candles <-chan interface{}, err error) {
 	request := struct {
 		Limit  int64  `json:"limit,required"`
 		Period string `json:"period,required"`
@@ -90,24 +76,12 @@ func (h *HitBTC) SubscribeCandles(symbol string, period string, limit int64) (
 		return
 	}
 
-	if _, ok := h.Feeds.CandlesFeed.Load(symbol); !ok {
-		h.Feeds.CandlesFeed.Store(symbol, make(chan CandlesSnapshot))
-	}
-
-	if _, ok := h.Feeds.Notifications.CandlesFeed.Load(symbol); !ok {
-		h.Feeds.Notifications.CandlesFeed.Store(symbol, make(chan CandlesUpdate))
-	}
-
-	snapshotChan, _ := h.Feeds.CandlesFeed.Load(symbol)
-	updateChan, _ := h.Feeds.Notifications.CandlesFeed.Load(symbol)
-
-	snapshot = snapshotChan.(chan CandlesSnapshot)
-	update = updateChan.(chan CandlesUpdate)
+	candles = h.Feeds.Sub(CandlesFeed + symbol)
 
 	return
 }
 
-// Unsubscribe from symbol candles
+// UnsubscribeCandles unsubscribe from symbol candles
 func (h *HitBTC) UnsubscribeCandles(symbol string) (err error) {
 	request := struct {
 		Symbol string `json:"symbol,required"`
@@ -115,21 +89,19 @@ func (h *HitBTC) UnsubscribeCandles(symbol string) (err error) {
 		Symbol: symbol,
 	}
 
+	h.Feeds.Close(CandlesFeed + symbol)
+
 	err = h.Subscribe("unsubscribeCandles", &request)
-	if err != nil {
-		return err
-	}
 
-	snapshot, _ := h.Feeds.CandlesFeed.Load(symbol)
-	update, _ := h.Feeds.Notifications.CandlesFeed.Load(symbol)
+	return err
+}
 
-	close(snapshot.(chan CandlesSnapshot))
-	close(update.(chan CandlesUpdate))
-
-	h.Feeds.Notifications.CandlesFeed.Delete(symbol)
-	h.Feeds.CandlesFeed.Delete(symbol)
-
-	return
+// OrderbookResponse struct
+type OrderbookResponse struct {
+	Ask      []SubtypeTrade `json:"ask,required"`
+	Bid      []SubtypeTrade `json:"bid,required"`
+	Symbol   string         `json:"symbol,required"`
+	Sequence int64          `json:"sequence,required"` // used to see if the snapshot is the latest
 }
 
 // SubtypeTrade struct
@@ -138,54 +110,22 @@ type SubtypeTrade struct {
 	Price string `json:"price,required"`
 }
 
-// Orderbook update struct
-type OrderbookUpdate struct {
-	Ask      []SubtypeTrade `json:"ask,required"`
-	Bid      []SubtypeTrade `json:"bid,required"`
-	Symbol   string         `json:"symbol,required"`
-	Sequence int64          `json:"sequence,required"` // used to see if the snapshot is the latest
-}
-
-// Orderbook snapshot struct
-type OrderbookSnapshot struct {
-	Ask      []SubtypeTrade `json:"ask,required"`
-	Bid      []SubtypeTrade `json:"bid,required"`
-	Symbol   string         `json:"symbol,required"`
-	Sequence int64          `json:"sequence,required"` // used to see if update is the latest received
-}
-
-// Subscribe to symbol orderbook
-func (h *HitBTC) SubscribeOrderbook(symbol string) (
-	update <-chan OrderbookUpdate, snapshot <-chan OrderbookSnapshot, err error) {
+// SubscribeOrderbook subscribe to symbol orderbook
+func (h *HitBTC) SubscribeOrderbook(symbol string) (orderbook <-chan interface{}, err error) {
 	request := struct {
 		Symbol string `json:"symbol,required"`
 	}{
 		Symbol: symbol,
 	}
 
+	orderbook = h.Feeds.Sub(OrderbookFeed + symbol)
+
 	err = h.Subscribe("subscribeOrderbook", &request)
-	if err != nil {
-		return
-	}
-
-	if _, ok := h.Feeds.OrderbookFeed.Load(symbol); !ok {
-		h.Feeds.OrderbookFeed.Store(symbol, make(chan OrderbookSnapshot))
-	}
-
-	if _, ok := h.Feeds.Notifications.OrderbookFeed.Load(symbol); !ok {
-		h.Feeds.Notifications.OrderbookFeed.Store(symbol, make(chan OrderbookUpdate))
-	}
-
-	snapshotChan, _ := h.Feeds.OrderbookFeed.Load(symbol)
-	updateChan, _ := h.Feeds.Notifications.OrderbookFeed.Load(symbol)
-
-	snapshot = snapshotChan.(chan OrderbookSnapshot)
-	update = updateChan.(chan OrderbookUpdate)
 
 	return
 }
 
-// Unsubscribe from symbol orderbook
+// UnsubscribeOrderbook unsubscribe from symbol orderbook
 func (h *HitBTC) UnsubscribeOrderbook(symbol string) (err error) {
 	request := struct {
 		Symbol string `json:"symbol,required"`
@@ -193,19 +133,9 @@ func (h *HitBTC) UnsubscribeOrderbook(symbol string) (err error) {
 		Symbol: symbol,
 	}
 
+	h.Feeds.Close(CandlesFeed + symbol)
+
 	err = h.Subscribe("unsubscribeOrderbook", &request)
-	if err != nil {
-		return err
-	}
-
-	snapshot, _ := h.Feeds.OrderbookFeed.Load(symbol)
-	update, _ := h.Feeds.Notifications.OrderbookFeed.Load(symbol)
-
-	close(snapshot.(chan OrderbookSnapshot))
-	close(update.(chan OrderbookUpdate))
-
-	h.Feeds.Notifications.OrderbookFeed.Delete(symbol)
-	h.Feeds.OrderbookFeed.Delete(symbol)
 
 	return
 }

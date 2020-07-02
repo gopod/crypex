@@ -2,6 +2,7 @@ package hitbtc_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -13,19 +14,34 @@ func TestSubscriptions(t *testing.T) {
 	instance := tests.SetupHitBTC(t)
 
 	t.Run("SubscribeReports", func(t *testing.T) {
-		_, snapshot, err := instance.SubscribeReports()
+		reports, err := instance.SubscribeReports()
 		assert.NoError(t, err)
 
-		t.Run("ReportsSnapshot", func(t *testing.T) {
-			<-snapshot
+		t.Run("Reports", func(t *testing.T) {
+			for stay, timeout := true, time.After(hitbtc.Timeout); stay; {
+				select {
+				case <-timeout:
+					stay = false
+				case _, ok := <-reports:
+					assert.True(t, ok)
+				}
+			}
 		})
 	})
 	t.Run("SubscribeCandles", func(t *testing.T) {
-		_, snapshot, err := instance.SubscribeCandles(tests.Demo, hitbtc.Period1Minute, 100)
+		candles, err :=
+			instance.SubscribeCandles(tests.Demo, hitbtc.Period1Minute, 100)
 		assert.NoError(t, err)
 
-		t.Run("CandlesSnapshot", func(t *testing.T) {
-			<-snapshot
+		t.Run("Candles", func(t *testing.T) {
+			for stay, timeout := true, time.After(hitbtc.Timeout); stay; {
+				select {
+				case <-timeout:
+					stay = false
+				case _, ok := <-candles:
+					assert.True(t, ok)
+				}
+			}
 		})
 	})
 	t.Run("UnsubscribeCandles", func(t *testing.T) {
@@ -33,11 +49,18 @@ func TestSubscriptions(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("SubscribeOrderbook", func(t *testing.T) {
-		_, snapshot, err := instance.SubscribeOrderbook(tests.Demo)
+		orderbook, err := instance.SubscribeOrderbook(tests.Demo)
 		assert.NoError(t, err)
 
-		t.Run("OrderbookSnapshot", func(t *testing.T) {
-			<-snapshot
+		t.Run("Orderbook", func(t *testing.T) {
+			for stay, timeout := true, time.After(hitbtc.Timeout); stay; {
+				select {
+				case <-timeout:
+					stay = false
+				case _, ok := <-orderbook:
+					assert.True(t, ok)
+				}
+			}
 		})
 	})
 	t.Run("UnsubscribeOrderbook", func(t *testing.T) {

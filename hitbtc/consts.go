@@ -3,6 +3,12 @@ package hitbtc
 import "time"
 
 const (
+	// Feed types
+	ErrorFeed     = "ERROR"
+	ReportsFeed   = "REPORTS"
+	CandlesFeed   = "CANDLES:"
+	OrderbookFeed = "ORDERBOOK:"
+
 	// Exchange name
 	Exchange = "HitBTC"
 
