@@ -3,6 +3,7 @@ module github.com/ramezanius/crypex
 go 1.14
 
 require (
+	github.com/cskr/pubsub v1.0.2
 	github.com/forestgiant/sliceutil v0.0.0-20160425183142-94783f95db6c
 	github.com/gorilla/websocket v1.4.2
 	github.com/satori/go.uuid v1.2.0
