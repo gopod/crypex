@@ -3,7 +3,7 @@ package hitbtc
 import (
 	"time"
 
-	"github.com/ramezanius/crypex/hitbtc/helper"
+	"github.com/ramezanius/crypex/pkg"
 )
 
 const (
@@ -97,7 +97,7 @@ type NewOrder struct {
 // NewOrder place a new order @authenticate
 func (h *HitBTC) NewOrder(request *NewOrder) (response *Report, err error) {
 	if request.OrderID == "" {
-		request.OrderID = helper.GenerateUUID()
+		request.OrderID = pkg.GenerateUUID()
 	}
 
 	err = h.Request("newOrder", &request, &response)
@@ -134,7 +134,7 @@ type ReplaceOrder struct {
 // ReplaceOrder replace a new order @authenticate
 func (h *HitBTC) ReplaceOrder(request *ReplaceOrder) (response *Report, err error) {
 	if request.RequestOrderID == "" {
-		request.RequestOrderID = helper.GenerateUUID()
+		request.RequestOrderID = pkg.GenerateUUID()
 	}
 
 	err = h.Request("cancelReplaceOrder", &request, &response)
