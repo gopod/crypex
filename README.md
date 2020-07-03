@@ -52,14 +52,12 @@ func main() {
 	fmt.Println(err, balances)
 
 	// Subscribe and consume data
-	updateFeed, snapshotFeed, err := client.SubscribeCandles("BTCUSD", "M1", 100)
+	candlesFeed, err := client.SubscribeCandles("BTCUSD", "M1", 100)
 
-	snapshot := <-snapshotFeed
-	fmt.Println(snapshot)
-
+	// If you subscribed many symbols, So you should use goroutines =)
 	for {
-		update := <-updateFeed
-		fmt.Println(update)
+		candles := <-candlesFeed
+		fmt.Println(snapshot)
 	}
 }
 ```
