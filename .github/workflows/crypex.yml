@@ -53,7 +53,7 @@ jobs:
       - name: "Send coverage to codacy"
         run: |
           go get github.com/schrej/godacov
-          godacov -t "$CODACY_TOKEN" -r ./coverage.out -c "$COMMIT_SHA"
+          godacov -t "$CODACY_TOKEN" -r ./coverage/coverage.out -c "$COMMIT_SHA"
         env:
           COMMIT_SHA: ${{ github.sha }}
           CODACY_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
