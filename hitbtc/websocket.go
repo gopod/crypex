@@ -82,7 +82,7 @@ func New() (*HitBTC, error) {
 		return nil, err
 	}
 
-	feeds := &Feeds{pubsub.New(0)}
+	feeds := &Feeds{pubsub.New(1)}
 
 	return &HitBTC{
 		Conn: JsonRPC2.NewConn(
