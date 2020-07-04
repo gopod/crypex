@@ -15,7 +15,7 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v1
       - name: "Run revive"
-        uses: docker://morphy/revive-action:v1
+        uses: morphy2k/revive-action@v1
 
   test:
     name: Test
