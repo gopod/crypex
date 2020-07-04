@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: coverage
-          path: coverage/coverage.out
+          path: coverage.out
 
   coverage:
     name: Coverage
@@ -49,7 +49,7 @@ jobs:
       - name: "Download coverage"
         uses: actions/download-artifact@v1
         with:
-          name: homework
+          name: coverage
       - name: "Send coverage to codacy"
         run: |
           go get github.com/schrej/godacov
