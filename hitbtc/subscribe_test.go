@@ -13,6 +13,10 @@ import (
 func TestSubscriptions(t *testing.T) {
 	instance := tests.SetupHitBTC(t)
 
+	defer func() {
+		assert.NoError(t, instance.Shutdown())
+	}()
+
 	t.Run("SubscribeReports", func(t *testing.T) {
 		reports, err := instance.SubscribeReports()
 		assert.NoError(t, err)
@@ -31,8 +35,7 @@ func TestSubscriptions(t *testing.T) {
 		})
 	})
 	t.Run("UnsubscribeCandles", func(t *testing.T) {
-		err := instance.UnsubscribeCandles(tests.Demo)
-		assert.NoError(t, err)
+		assert.NoError(t, instance.UnsubscribeCandles(tests.Demo))
 	})
 	t.Run("SubscribeOrderbook", func(t *testing.T) {
 		orderbook, err := instance.SubscribeOrderbook(tests.Demo)
@@ -43,8 +46,7 @@ func TestSubscriptions(t *testing.T) {
 		})
 	})
 	t.Run("UnsubscribeOrderbook", func(t *testing.T) {
-		err := instance.UnsubscribeOrderbook(tests.Demo)
-		assert.NoError(t, err)
+		assert.NoError(t, instance.UnsubscribeOrderbook(tests.Demo))
 	})
 }
 

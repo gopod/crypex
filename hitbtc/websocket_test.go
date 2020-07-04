@@ -9,12 +9,13 @@ import (
 )
 
 func TestHitBTC(t *testing.T) {
-	var err error
-
 	instance := tests.SetupHitBTC(t)
 
+	defer func() {
+		assert.NoError(t, instance.Shutdown())
+	}()
+
 	t.Run("Authenticate", func(t *testing.T) {
-		err = instance.Authenticate()
-		assert.NoError(t, err)
+		assert.NoError(t, instance.Authenticate())
 	})
 }

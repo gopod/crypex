@@ -12,6 +12,10 @@ import (
 func TestRequests(t *testing.T) {
 	instance := tests.SetupHitBTC(t)
 
+	defer func() {
+		assert.NoError(t, instance.Shutdown())
+	}()
+
 	t.Run("GetSymbol", func(t *testing.T) {
 		_, err := instance.GetSymbol("BTC" + "USD")
 		assert.NoError(t, err)
