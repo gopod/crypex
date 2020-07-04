@@ -33,10 +33,10 @@ jobs:
           HITBTC_PUBLIC_KEY: ${{ secrets.HITBTC_PUBLIC_KEY }}
           HITBTC_SECRET_KEY: ${{ secrets.HITBTC_SECRET_KEY }}
       - name: "Upload coverage"
-          uses: actions/upload-artifact@v1
-          with:
-            name: coverage
-            path: coverage/coverage.out
+        uses: actions/upload-artifact@v1
+        with:
+          name: coverage
+          path: coverage/coverage.out
 
   coverage:
     name: Coverage
