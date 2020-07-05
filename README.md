@@ -1,6 +1,6 @@
 <img src=".github/crypex.png" alt="Crypex Logo" />
 
-[![Build](https://img.shields.io/github/workflow/status/ramezanius/crypex/Continuous%20Integration?label=Build)](https://google.com)
+[![Build](https://img.shields.io/github/workflow/status/ramezanius/crypex/Continuous%20Integration?label=build)](https://google.com)
 [![Coverage](https://img.shields.io/codacy/coverage/6996e8a7fdb845eea86f02740f57e94b?label=coverage)](http://app.codacy.com/manual/ramezanius/crypex/dashboard?bid=18899044)
 [![Issues](https://img.shields.io/github/issues/ramezanius/crypex?label=issues)](https://github.com/ramezanius/crypex/issues)
 [![PullRequests](https://img.shields.io/github/issues-pr/ramezanius/crypex?label=pull%20requests)](https://github.com/ramezanius/crypex/pulls)
