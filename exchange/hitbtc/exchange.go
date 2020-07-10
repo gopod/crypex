@@ -13,7 +13,6 @@ import (
 	ws "github.com/sourcegraph/jsonrpc2/websocket"
 
 	"github.com/ramezanius/crypex/exchange"
-	"github.com/ramezanius/crypex/exchange/util"
 )
 
 const (
@@ -70,7 +69,9 @@ func (h *HitBTC) Authenticate() (err error) {
 
 // Shutdown removes and closes subscribed channels.
 func (h *HitBTC) Shutdown() error {
-	return util.Shutdown()
+	h.Feeds.Shutdown()
+
+	return h.Connection.Close()
 }
 
 // request sends an http request.
