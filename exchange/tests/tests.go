@@ -20,8 +20,7 @@ func ReceiveWithTimeout(t *testing.T, ch <-chan interface{}, timeout *time.Durat
 		select {
 		case <-timeout:
 			stay = false
-		case data, ok := <-ch:
-			t.Log(data)
+		case _, ok := <-ch:
 			assert.True(t, ok)
 		}
 	}
