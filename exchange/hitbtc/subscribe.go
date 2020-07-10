@@ -10,7 +10,7 @@ import (
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
-// Handle handles websocket feeds.
+// Handle handles stream feeds.
 func (f *Feeds) Handle(_ context.Context, _ *jsonrpc2.Conn, request *jsonrpc2.Request) {
 	response := *request.Params
 

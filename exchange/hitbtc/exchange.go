@@ -127,7 +127,7 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 	return err
 }
 
-// stream sends a request to websocket connection.
+// Stream sends a request to websocket connection.
 func (h *HitBTC) Stream(request exchange.StreamParams, response interface{}) error {
 	return h.Connection.Call(
 		context.Background(), request.Method, request.Params, &response,
