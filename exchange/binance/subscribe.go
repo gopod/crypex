@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sourcegraph/jsonrpc2"
+	"github.com/ramezanius/jsonrpc2"
 
 	"github.com/ramezanius/crypex/exchange"
 	"github.com/ramezanius/crypex/exchange/util"

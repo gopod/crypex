@@ -9,8 +9,8 @@ import (
 
 	"github.com/cskr/pubsub"
 	"github.com/gorilla/websocket"
-	"github.com/sourcegraph/jsonrpc2"
-	ws "github.com/sourcegraph/jsonrpc2/websocket"
+	"github.com/ramezanius/jsonrpc2"
+	ws "github.com/ramezanius/jsonrpc2/websocket"
 
 	"github.com/ramezanius/crypex/exchange"
 )

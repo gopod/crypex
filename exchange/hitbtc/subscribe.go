@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/sourcegraph/jsonrpc2"
+	"github.com/ramezanius/jsonrpc2"
 
 	"github.com/ramezanius/crypex/exchange"
 	"github.com/ramezanius/crypex/exchange/util"
