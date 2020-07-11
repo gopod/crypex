@@ -44,6 +44,11 @@ var Binance *binance.Binance
 func setupExchange() {
 	var err error
 
+	HitBTC, err = binance.New("YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY")
+	if err != nil {
+		log.Panic(err)
+	}
+
 	Binance, err = binance.New("YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY")
 	if err != nil {
 		log.Panic(err)
