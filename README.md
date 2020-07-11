@@ -59,7 +59,6 @@ func setupExchange() {
 func main() {
 	setupExchange()
 
-	GetSymbol()
 	GetSymbols()
 
 	GetBalances()
@@ -71,15 +70,6 @@ func main() {
 	SubscribeReports()
 	SubscribeCandles()
 	UnsubscribeCandles()
-}
-
-func GetSymbol() {
-	symbol, err := HitBTC.GetSymbol(hitbtc.Demo)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(symbol)
 }
 
 func GetSymbols() {
