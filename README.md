@@ -36,7 +36,6 @@ import (
 	"sync"
 
 	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/hitbtc"
 )
 
 var HitBTC *hitbtc.HitBTC
@@ -44,11 +43,6 @@ var Binance *binance.Binance
 
 func setupExchange() {
 	var err error
-
-	HitBTC, err = hitbtc.New("YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
 
 	Binance, err = binance.New("YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY")
 	if err != nil {
@@ -59,97 +53,58 @@ func setupExchange() {
 func main() {
 	setupExchange()
 
-	GetSymbols()
-
-	GetBalances()
-
-	NewOrder()
-	CancelOrder()
-	ReplaceOrder()
-
 	SubscribeReports()
 	SubscribeCandles()
 	UnsubscribeCandles()
 }
 
-func GetSymbols() {
-	symbols, err := HitBTC.GetSymbols()
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(symbols)
-}
-
-func GetBalances() {
-	balances, err := HitBTC.GetBalances()
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(balances)
-}
-
-func NewOrder() {
-	order, err := HitBTC.NewOrder(hitbtc.NewOrder{
-		Price:    2000,
-		Quantity: 0.00002,
-
-		Side:   hitbtc.Buy,
-		Type:   hitbtc.Limit,
-		Symbol: hitbtc.Demo,
-	})
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(order)
-}
-
-func CancelOrder() {
-	order, err := HitBTC.CancelOrder("FAKE_ORDER_ID")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(order)
-}
-
-func ReplaceOrder() {
-	order, err := HitBTC.ReplaceOrder(hitbtc.ReplaceOrder{
-		Price:    1000,
-		Quantity: 0.00001,
-		OrderID:  "FAKE_ORDER_ID",
-	})
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(order)
-}
-
 func SubscribeReports() {
-	reports, err := HitBTC.SubscribeReports()
-	if err != nil {
-		log.Panic(err)
-	}
+    var (
+        err error
+        hitbtcReports, binanceReports <-chan interface{}
+    )
 
-	wg := sync.WaitGroup{}
+    hitbtcReports, err = HitBTC.SubscribeReports()
+    if err != nil {
+        log.Panic(err)
+    }
 
-	wg.Add(1)
-	defer wg.Done()
+    binanceReports, err = Binance.SubscribeReports()
+    if err != nil {
+        log.Panic(err)
+    }
 
-	for {
-		log.Println(<-reports)
-	}
+    wg := sync.WaitGroup{}
+
+    wg.Add(1)
+    defer wg.Done()
+
+    for {
+        log.Println(<-hitbtcReports)
+        log.Println(<-binanceReports)
+    }
 }
 
 func SubscribeCandles() {
-	candles, err := HitBTC.SubscribeCandles(
+    var (
+        err error
+        hitbtcCandles, binanceCandles <-chan interface{}
+    )
+
+	hitbtcCandles, err = HitBTC.SubscribeCandles(
 		hitbtc.CandlesParams{
 			Limit:  100,
 			Symbol: hitbtc.Demo,
 			Period: hitbtc.Period1Minute,
+		})
+	if err != nil {
+		log.Panic(err)
+	}
+
+    binanceCandles, err = Binance.SubscribeCandles(
+		binance.CandlesParams{
+			Symbol: binance.Demo,
+			Period: binance.Period1Minute,
 		})
 	if err != nil {
 		log.Panic(err)
@@ -161,7 +116,8 @@ func SubscribeCandles() {
 	defer wg.Done()
 
 	for {
-		log.Println(<-candles)
+		log.Println(<-hitbtcCandles)
+		log.Println(<-binanceCandles)
 	}
 }
 
@@ -173,6 +129,14 @@ func UnsubscribeCandles() {
 	if err != nil {
 		log.Panic(err)
 	}
+
+    err = Binance.UnsubscribeCandles(
+        binance.CandlesParams{
+            Symbol: hitbtc.Demo,
+        })
+    if err != nil {
+        log.Panic(err)
+    }
 }
 
 ```
