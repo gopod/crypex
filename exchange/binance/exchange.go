@@ -2,9 +2,6 @@ package binance
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,13 +14,15 @@ import (
 	ws "github.com/ramezanius/jsonrpc2/websocket"
 
 	"github.com/ramezanius/crypex/exchange"
+	"github.com/ramezanius/crypex/exchange/util"
 )
 
 const (
 	apiURL    = "https://api.binance.com/api/v3"
 	streamURL = "wss://stream.binance.com:9443/ws/"
 
-	keepAlive = 30 * time.Minute
+	recvWindow = "5000"
+	keepAlive  = 30 * time.Minute
 )
 
 // New create a new binance instance.
@@ -107,8 +106,6 @@ func (b *Binance) Authenticate() (err error) {
 	}
 
 	b.ListenKey = response["listenKey"]
-	b.Signature = hex.EncodeToString(
-		hmac.New(sha256.New, []byte(b.SecretKey)).Sum(nil))
 
 	// Send a PUT request every 30 minutes for keep-alive listen key.
 	go func() {
@@ -156,12 +153,17 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 		q.Set(k, fmt.Sprintf("%v", v))
 	}
 
-	if request.Auth && b.Signature != "" {
+	if request.Auth {
+		q.Add("recvWindow", recvWindow)
+		// Timestamp is mandatory in signed request
+		q.Add("timestamp", fmt.Sprintf("%v", time.Now().Unix()*1000))
 		// Signature needs to be at the last param
-		parsedURL.RawQuery = q.Encode() + "&signature=" + b.Signature
+		parsedURL.RawQuery =
+			q.Encode() + "&signature=" + util.GenerateSignature(b.SecretKey, q)
+	} else {
+		parsedURL.RawQuery = q.Encode()
 	}
 
-	parsedURL.RawQuery = q.Encode()
 	req, _ := http.NewRequest(request.Method, parsedURL.String(), nil)
 
 	req.Header.Add("Content-type", "application/json")
