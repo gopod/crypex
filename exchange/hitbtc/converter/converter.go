@@ -6,7 +6,7 @@ import (
 	"github.com/ramezanius/crypex/exchange/hitbtc"
 )
 
-// Repository caching exchange repository.
+// Repository caching exchange repository
 type Repository interface {
 	GetPrice(symbol string, exchange string) float64
 
