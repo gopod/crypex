@@ -4,14 +4,12 @@ import (
 	"log"
 	"sync"
 
-	"github.com/ramezanius/crypex/exchange/binance"
 	"github.com/ramezanius/crypex/exchange/hitbtc"
 )
 
 var HitBTC *hitbtc.HitBTC
-var Binance *binance.Binance
 
-func setupExchange() {
+func main() {
 	var err error
 
 	HitBTC, err = hitbtc.New("YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY")
@@ -19,16 +17,6 @@ func setupExchange() {
 		log.Panic(err)
 	}
 
-	Binance, err = binance.New("YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-func main() {
-	setupExchange()
-
-	GetSymbol()
 	GetSymbols()
 
 	GetBalances()
@@ -40,15 +28,6 @@ func main() {
 	SubscribeReports()
 	SubscribeCandles()
 	UnsubscribeCandles()
-}
-
-func GetSymbol() {
-	symbol, err := HitBTC.GetSymbol(hitbtc.Demo)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(symbol)
 }
 
 func GetSymbols() {
