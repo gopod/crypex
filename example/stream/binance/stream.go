@@ -17,8 +17,25 @@ func main() {
 		log.Panic(err)
 	}
 
+	SubscribeReports()
 	SubscribeCandles()
 	UnsubscribeCandles()
+}
+
+func SubscribeReports() {
+	candles, err := Binance.SubscribeReports()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	defer wg.Done()
+
+	for {
+		log.Println(<-candles)
+	}
 }
 
 func SubscribeCandles() {
