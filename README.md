@@ -59,37 +59,37 @@ func main() {
 }
 
 func SubscribeReports() {
-    var (
-        err error
-        hitbtcReports, binanceReports <-chan interface{}
-    )
+	var (
+		err error
+		hitbtcReports, binanceReports <-chan interface{}
+	)
 
-    hitbtcReports, err = HitBTC.SubscribeReports()
-    if err != nil {
-        log.Panic(err)
-    }
+	hitbtcReports, err = HitBTC.SubscribeReports()
+	if err != nil {
+		log.Panic(err)
+	}
 
-    binanceReports, err = Binance.SubscribeReports()
-    if err != nil {
-        log.Panic(err)
-    }
+	binanceReports, err = Binance.SubscribeReports()
+	if err != nil {
+		log.Panic(err)
+	}
 
-    wg := sync.WaitGroup{}
+	wg := sync.WaitGroup{}
 
-    wg.Add(1)
-    defer wg.Done()
+	wg.Add(1)
+	defer wg.Done()
 
-    for {
-        log.Println(<-hitbtcReports)
-        log.Println(<-binanceReports)
-    }
+	for {
+		log.Println(<-hitbtcReports)
+		log.Println(<-binanceReports)
+	}
 }
 
 func SubscribeCandles() {
-    var (
-        err error
-        hitbtcCandles, binanceCandles <-chan interface{}
-    )
+	var (
+		err error
+		hitbtcCandles, binanceCandles <-chan interface{}
+	)
 
 	hitbtcCandles, err = HitBTC.SubscribeCandles(
 		hitbtc.CandlesParams{
@@ -101,7 +101,7 @@ func SubscribeCandles() {
 		log.Panic(err)
 	}
 
-    binanceCandles, err = Binance.SubscribeCandles(
+	binanceCandles, err = Binance.SubscribeCandles(
 		binance.CandlesParams{
 			Symbol: binance.Demo,
 			Period: binance.Period1Minute,
@@ -130,13 +130,13 @@ func UnsubscribeCandles() {
 		log.Panic(err)
 	}
 
-    err = Binance.UnsubscribeCandles(
-        binance.CandlesParams{
-            Symbol: hitbtc.Demo,
-        })
-    if err != nil {
-        log.Panic(err)
-    }
+	err = Binance.UnsubscribeCandles(
+		binance.CandlesParams{
+		    Symbol: hitbtc.Demo,
+		})
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 ```
