@@ -254,8 +254,8 @@ Supported exchanges
 
 Exchange | Stream methods | API methods
 :-:|:-:|:-:
-HitBTC | `Candles`, `Reports` | `NewOrder`, `ReplaceOrder`, `CancelOrder`
-Binance | `Klines` | 
+HitBTC | `Candles`, `Reports` | `NewOrder`, `ReplaceOrder`, `CancelOrder`, `GetSymbols`, `GetBalances`
+Binance | `Klines`, `Reports` | `NewOrder`, `CancelOrder`, `GetSymbols`, `GetBalances`
 
 ------
 
