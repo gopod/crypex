@@ -71,12 +71,6 @@ type Symbol struct {
 	ID    string `json:"id,required"`
 	Base  string `json:"baseCurrency,required"`
 	Quote string `json:"quoteCurrency,required"`
-
-	TickSize             string `json:"tickSize,required"`
-	FeeCurrency          string `json:"feeCurrency,required"`
-	QuantityIncrement    string `json:"quantityIncrement,required"`
-	TakeLiquidityRate    string `json:"takeLiquidityRate,required"`
-	ProvideLiquidityRate string `json:"provideLiquidityRate,required"`
 }
 
 // Symbols struct
