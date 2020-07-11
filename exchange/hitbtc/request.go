@@ -7,23 +7,6 @@ import (
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
-// GetSymbol gets specific symbol details.
-func (h *HitBTC) GetSymbol(symbol string) (response *Symbol, err error) {
-	params := struct {
-		Symbol string `json:"symbol,required"`
-	}{Symbol: symbol}
-
-	err = h.Stream(exchange.StreamParams{
-		Params: params,
-		Method: "getSymbol",
-	}, &response)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
 // GetSymbols gets a list of exchange symbols.
 func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
 	err = h.Stream(exchange.StreamParams{
