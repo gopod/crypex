@@ -19,8 +19,8 @@ func main() {
 
 	ToUSD()
 
+	GetSymbol()
 	GetSymbols()
-
 	GetBalances()
 
 	NewOrder()
@@ -51,6 +51,15 @@ func ToUSD() {
 	value := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
 
 	log.Println(value)
+}
+
+func GetSymbol() {
+	symbol, err := HitBTC.GetSymbol(hitbtc.Demo)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	log.Println(symbol)
 }
 
 func GetSymbols() {

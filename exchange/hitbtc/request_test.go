@@ -4,6 +4,13 @@ import (
 	"github.com/ramezanius/crypex/exchange/hitbtc"
 )
 
+func (suite *hitbtcSuite) TestGetSymbol() {
+	symbol, err := suite.Exchange.GetSymbol(hitbtc.Demo)
+
+	suite.NoError(err)
+	suite.NotEmpty(symbol)
+}
+
 func (suite *hitbtcSuite) TestGetSymbols() {
 	symbols, err := suite.Exchange.GetSymbols()
 
