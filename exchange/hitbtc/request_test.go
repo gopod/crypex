@@ -1,8 +1,6 @@
 package hitbtc_test
 
-import (
-	"github.com/ramezanius/crypex/exchange/hitbtc"
-)
+import "github.com/ramezanius/crypex/exchange/hitbtc"
 
 func (suite *hitbtcSuite) TestGetSymbol() {
 	symbol, err := suite.Exchange.GetSymbol(hitbtc.Demo)
