@@ -19,7 +19,7 @@ import (
 
 const (
 	apiURL    = "https://api.binance.com/api/v3"
-	streamURL = "wss://stream.binance.com:9443/ws/"
+	streamURL = "wss://stream.binance.com:9443/ws"
 
 	recvWindow = "5000"
 	keepAlive  = 30 * time.Minute
@@ -32,13 +32,15 @@ func New(public, secret string) (*Binance, error) {
 		Feeds: feeds,
 	}
 
-	binance.PublicKey, binance.SecretKey = public, secret
-	err := binance.Authenticate()
-	if err != nil {
-		return nil, err
+	if public != "" && secret != "" {
+		binance.PublicKey, binance.SecretKey = public, secret
+		err := binance.Authenticate()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	conn, _, err := websocket.DefaultDialer.Dial(streamURL+binance.ListenKey, nil)
+	conn, _, err := websocket.DefaultDialer.Dial(streamURL+"/"+binance.ListenKey, nil)
 	if err != nil {
 		return nil, err
 	}

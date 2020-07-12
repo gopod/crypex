@@ -38,10 +38,12 @@ func New(public, secret string) (*HitBTC, error) {
 		jsonrpc2.AsyncHandler(feeds),
 	)
 
-	hitbtc.PublicKey, hitbtc.SecretKey = public, secret
-	err = hitbtc.Authenticate()
-	if err != nil {
-		return nil, err
+	if public != "" && secret != "" {
+		hitbtc.PublicKey, hitbtc.SecretKey = public, secret
+		err = hitbtc.Authenticate()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return hitbtc, nil
