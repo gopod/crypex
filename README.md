@@ -33,7 +33,6 @@ See it in action:
 ```go
 import (
 	"log"
-	"sync"
 
 	"github.com/ramezanius/crypex/exchange/binance"
 )
@@ -79,8 +78,8 @@ func SubscribeReports() {
 		log.Panic(err)
 	}
 
-    log.Println(<-hitbtcReports)
-    log.Println(<-binanceReports)
+	log.Println(<-hitbtcReports)
+	log.Println(<-binanceReports)
 }
 
 func SubscribeCandles() {
@@ -108,8 +107,8 @@ func SubscribeCandles() {
 		log.Panic(err)
 	}
 
-    log.Println(<-hitbtcCandles)
-    log.Println(<-binanceCandles)
+	log.Println(<-hitbtcCandles)
+	log.Println(<-binanceCandles)
 }
 
 func UnsubscribeCandles() {
