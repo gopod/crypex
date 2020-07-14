@@ -199,7 +199,7 @@ This will then make the following packages available to you:
 Staying up to date
 ==================
 
-To update Crypex to the latest version, use `go get github.com/ramezanius/crypex`.
+To update Crypex to the latest version, use `go get -u github.com/ramezanius/crypex`.
 
 ------
 
