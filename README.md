@@ -79,15 +79,8 @@ func SubscribeReports() {
 		log.Panic(err)
 	}
 
-	wg := sync.WaitGroup{}
-
-	wg.Add(1)
-	defer wg.Done()
-
-	for {
-		log.Println(<-hitbtcReports)
-		log.Println(<-binanceReports)
-	}
+    log.Println(<-hitbtcReports)
+    log.Println(<-binanceReports)
 }
 
 func SubscribeCandles() {
@@ -115,15 +108,8 @@ func SubscribeCandles() {
 		log.Panic(err)
 	}
 
-	wg := sync.WaitGroup{}
-
-	wg.Add(2)
-	defer wg.Done()
-
-	for {
-		log.Println(<-hitbtcCandles)
-		log.Println(<-binanceCandles)
-	}
+    log.Println(<-hitbtcCandles)
+    log.Println(<-binanceCandles)
 }
 
 func UnsubscribeCandles() {

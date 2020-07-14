@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"sync"
 
 	"github.com/ramezanius/crypex/exchange/binance"
 )
@@ -28,14 +27,7 @@ func SubscribeReports() {
 		log.Panic(err)
 	}
 
-	wg := sync.WaitGroup{}
-
-	wg.Add(1)
-	defer wg.Done()
-
-	for {
-		log.Println(<-candles)
-	}
+	log.Println(<-candles)
 }
 
 func SubscribeCandles() {
@@ -48,14 +40,7 @@ func SubscribeCandles() {
 		log.Panic(err)
 	}
 
-	wg := sync.WaitGroup{}
-
-	wg.Add(2)
-	defer wg.Done()
-
-	for {
-		log.Println(<-candles)
-	}
+	log.Println(<-candles)
 }
 
 func UnsubscribeCandles() {
