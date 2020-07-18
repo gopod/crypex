@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/ramezanius/crypex/exchange/binance"
+	"github.com/ramezanius/crypex/exchange/binance/converter"
 )
 
 var Binance *binance.Binance
@@ -16,12 +17,41 @@ func main() {
 		log.Panic(err)
 	}
 
-	GetSymbols()
+	ToUSD()
 
+	GetSymbols()
 	GetBalances()
 
 	NewOrder()
 	CancelOrder()
+}
+
+const price, quantity = 10000.0, 10.0
+
+type repository struct{}
+
+// GetPrice returns fake price (BTC/USD)
+func (r *repository) GetPrice(_, _ string) float64 {
+	return price
+}
+
+// GetSymbol returns fake symbol detail (BTC/USD)[Demo]
+func (r *repository) GetSymbol(_, _ string) interface{} {
+	return &binance.Symbol{
+		Base:  binance.BTC,
+		Quote: binance.USD,
+		ID:    binance.Demo,
+	}
+}
+
+func ToUSD() {
+	cache := &repository{}
+	value, err := converter.ToUSD(cache, binance.BTC, quantity, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(value)
 }
 
 func GetSymbols() {
