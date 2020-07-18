@@ -9,17 +9,17 @@ import (
 	"github.com/ramezanius/crypex/exchange/binance/converter"
 )
 
-const price, quantity = 10000.0, 10.0
+const price, quantity = 1000.0, 10.0
 
-type repository struct{}
+type binanceRepository struct{}
 
 // GetPrice returns fake price (BTC/USD)
-func (r *repository) GetPrice(_, _ string) float64 {
+func (r *binanceRepository) GetPrice(_, _ string) float64 {
 	return price
 }
 
 // GetSymbol returns fake symbol detail (BTC/USD)[Demo]
-func (r *repository) GetSymbol(_, _ string) interface{} {
+func (r *binanceRepository) GetSymbol(_, _ string) interface{} {
 	return &binance.Symbol{
 		Base:  binance.BTC,
 		Quote: binance.USD,
@@ -36,7 +36,7 @@ func TestConverter(t *testing.T) {
 }
 
 func (suite *binanceConverterSuite) TestToUSD() {
-	cache := &repository{}
+	cache := &binanceRepository{}
 	value, err := converter.ToUSD(cache, binance.BTC, quantity, false)
 
 	suite.NoError(err)

@@ -11,15 +11,15 @@ import (
 
 const price, quantity = 10000.0, 10.0
 
-type repository struct{}
+type hitbtcRepository struct{}
 
 // GetPrice returns fake price (BTC/USD)
-func (r *repository) GetPrice(_, _ string) float64 {
+func (r *hitbtcRepository) GetPrice(_, _ string) float64 {
 	return price
 }
 
 // GetSymbol returns fake symbol detail (BTC/USD)[Demo]
-func (r *repository) GetSymbol(_, _ string) interface{} {
+func (r *hitbtcRepository) GetSymbol(_, _ string) interface{} {
 	return &hitbtc.Symbol{
 		Base:  hitbtc.BTC,
 		Quote: hitbtc.USD,
@@ -36,7 +36,7 @@ func TestConverter(t *testing.T) {
 }
 
 func (suite *hitbtcConverterSuite) TestToUSD() {
-	cache := &repository{}
+	cache := &hitbtcRepository{}
 	value, err := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
 
 	suite.NoError(err)
