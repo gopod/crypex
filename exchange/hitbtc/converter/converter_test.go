@@ -37,7 +37,8 @@ func TestConverter(t *testing.T) {
 
 func (suite *hitbtcConverterSuite) TestToUSD() {
 	cache := &repository{}
-	value := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
+	value, err := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
 
+	suite.NoError(err)
 	suite.Equal(value, quantity*price)
 }
