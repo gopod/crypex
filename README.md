@@ -172,7 +172,10 @@ func (r *repository) GetSymbol(_, _ string) interface{} {
 
 func ToUSD() {
 	cache := &repository{}
-	value := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
+	value, err := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
+    if err != nil {
+        log.Fatal(err)
+    }
 
 	log.Println(value)
 }
