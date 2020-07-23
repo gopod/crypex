@@ -5,64 +5,33 @@ import (
 
 	"github.com/ramezanius/crypex/exchange/hitbtc"
 	"github.com/ramezanius/crypex/exchange/hitbtc/converter"
+	"github.com/ramezanius/crypex/exchange/tests"
 )
 
 var HitBTC *hitbtc.HitBTC
 
 func main() {
-	var err error
-
-	HitBTC, err = hitbtc.New("YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
+	HitBTC = hitbtc.New()
+	HitBTC.PublicKey = "YOUR_HITBTC_PUBLIC_KEY"
+	HitBTC.SecretKey = "YOUR_HITBTC_SECRET_KEY"
 
 	ToUSD()
 
-	GetSymbol()
 	GetSymbols()
 	GetBalances()
 
 	NewOrder()
 	CancelOrder()
-	ReplaceOrder()
-}
-
-const price, quantity = 10000.0, 10.0
-
-type repository struct{}
-
-// GetPrice returns fake price (BTC/USD)
-func (r *repository) GetPrice(_, _ string) float64 {
-	return price
-}
-
-// GetSymbol returns fake symbol detail (BTC/USD)[Demo]
-func (r *repository) GetSymbol(_, _ string) interface{} {
-	return &hitbtc.Symbol{
-		Base:  hitbtc.BTC,
-		Quote: hitbtc.USD,
-		ID:    hitbtc.Demo,
-	}
 }
 
 func ToUSD() {
-	cache := &repository{}
-	value, err := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
+	cache := &tests.Repository{}
+	value, err := converter.ToUSD(cache, hitbtc.BTC, 10, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Println(value)
-}
-
-func GetSymbol() {
-	symbol, err := HitBTC.GetSymbol(hitbtc.Demo)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(symbol)
 }
 
 func GetSymbols() {
@@ -90,7 +59,7 @@ func NewOrder() {
 
 		Side:   hitbtc.Buy,
 		Type:   hitbtc.Limit,
-		Symbol: hitbtc.Demo,
+		Symbol: hitbtc.BTC + hitbtc.USD,
 	})
 	if err != nil {
 		log.Panic(err)
@@ -101,19 +70,6 @@ func NewOrder() {
 
 func CancelOrder() {
 	order, err := HitBTC.CancelOrder("FAKE_ORDER_ID")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(order)
-}
-
-func ReplaceOrder() {
-	order, err := HitBTC.ReplaceOrder(hitbtc.ReplaceOrder{
-		Price:    1000,
-		Quantity: 0.00001,
-		OrderID:  "FAKE_ORDER_ID",
-	})
 	if err != nil {
 		log.Panic(err)
 	}

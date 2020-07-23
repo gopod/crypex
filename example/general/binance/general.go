@@ -5,17 +5,15 @@ import (
 
 	"github.com/ramezanius/crypex/exchange/binance"
 	"github.com/ramezanius/crypex/exchange/binance/converter"
+	"github.com/ramezanius/crypex/exchange/tests"
 )
 
 var Binance *binance.Binance
 
 func main() {
-	var err error
-
-	Binance, err = binance.New("YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
+	Binance = binance.New()
+	Binance.PublicKey = "YOUR_BINANCE_PUBLIC_KEY"
+	Binance.SecretKey = "YOUR_BINANCE_SECRET_KEY"
 
 	ToUSD()
 
@@ -26,27 +24,9 @@ func main() {
 	CancelOrder()
 }
 
-const price, quantity = 10000.0, 10.0
-
-type repository struct{}
-
-// GetPrice returns fake price (BTC/USD)
-func (r *repository) GetPrice(_, _ string) float64 {
-	return price
-}
-
-// GetSymbol returns fake symbol detail (BTC/USD)[Demo]
-func (r *repository) GetSymbol(_, _ string) interface{} {
-	return &binance.Symbol{
-		Base:  binance.BTC,
-		Quote: binance.USD,
-		ID:    binance.Demo,
-	}
-}
-
 func ToUSD() {
-	cache := &repository{}
-	value, err := converter.ToUSD(cache, binance.BTC, quantity, false)
+	cache := &tests.Repository{}
+	value, err := converter.ToUSD(cache, binance.BTC, 10, false)
 	if err != nil {
 		log.Fatal(err)
 	}

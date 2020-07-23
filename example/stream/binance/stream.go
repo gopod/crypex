@@ -9,44 +9,45 @@ import (
 var Binance *binance.Binance
 
 func main() {
-	var err error
-
-	Binance, err = binance.New("YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
+	Binance = binance.New()
+	Binance.PublicKey = "YOUR_BINANCE_PUBLIC_KEY"
+	Binance.SecretKey = "YOUR_BINANCE_SECRET_KEY"
 
 	SubscribeReports()
-	SubscribeCandles()
-	UnsubscribeCandles()
+	SubscribeCandles(binance.CandlesParams{
+		Symbol: binance.BNB + binance.USD,
+		Period: binance.Period1Minute,
+	})
 }
 
 func SubscribeReports() {
-	candles, err := Binance.SubscribeReports()
-	if err != nil {
-		log.Panic(err)
-	}
+	defer func() {
+		err := Binance.UnsubscribeReports()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	log.Println(<-candles)
-}
-
-func SubscribeCandles() {
-	candles, err := Binance.SubscribeCandles(
-		binance.CandlesParams{
-			Symbol: binance.Demo,
-			Period: binance.Period1Minute,
+	err := Binance.SubscribeReports(
+		func(response interface{}) {
+			log.Println(response)
 		})
 	if err != nil {
 		log.Panic(err)
 	}
-
-	log.Println(<-candles)
 }
 
-func UnsubscribeCandles() {
-	err := Binance.UnsubscribeCandles(
-		binance.CandlesParams{
-			Symbol: binance.Demo,
+func SubscribeCandles(params binance.CandlesParams) {
+	defer func() {
+		err := Binance.UnsubscribeCandles(params)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	err := Binance.SubscribeCandles(
+		params, func(response interface{}) {
+			log.Println(response)
 		})
 	if err != nil {
 		log.Panic(err)

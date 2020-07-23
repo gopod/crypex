@@ -9,45 +9,45 @@ import (
 var HitBTC *hitbtc.HitBTC
 
 func main() {
-	var err error
-
-	HitBTC, err = hitbtc.New("YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
+	HitBTC = hitbtc.New()
+	HitBTC.PublicKey = "YOUR_HITBTC_PUBLIC_KEY"
+	HitBTC.SecretKey = "YOUR_HITBTC_SECRET_KEY"
 
 	SubscribeReports()
-	SubscribeCandles()
-	UnsubscribeCandles()
+	SubscribeCandles(hitbtc.CandlesParams{
+		Symbol: hitbtc.BTC + hitbtc.USD,
+		Period: hitbtc.Period1Minute,
+	})
 }
 
 func SubscribeReports() {
-	reports, err := HitBTC.SubscribeReports()
-	if err != nil {
-		log.Panic(err)
-	}
+	defer func() {
+		err := HitBTC.UnsubscribeReports()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	log.Println(<-reports)
-}
-
-func SubscribeCandles() {
-	candles, err := HitBTC.SubscribeCandles(
-		hitbtc.CandlesParams{
-			Limit:  100,
-			Symbol: hitbtc.Demo,
-			Period: hitbtc.Period1Minute,
+	err := HitBTC.SubscribeReports(
+		func(response interface{}) {
+			log.Println(response)
 		})
 	if err != nil {
 		log.Panic(err)
 	}
-
-	log.Println(<-candles)
 }
 
-func UnsubscribeCandles() {
-	err := HitBTC.UnsubscribeCandles(
-		hitbtc.CandlesParams{
-			Symbol: hitbtc.Demo,
+func SubscribeCandles(params hitbtc.CandlesParams) {
+	defer func() {
+		err := HitBTC.UnsubscribeCandles(params)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	err := HitBTC.SubscribeCandles(
+		params, func(response interface{}) {
+			log.Println(response)
 		})
 	if err != nil {
 		log.Panic(err)
