@@ -35,94 +35,84 @@ import (
 	"log"
 
 	"github.com/ramezanius/crypex/exchange/binance"
+	"github.com/ramezanius/crypex/exchange/hitbtc"
 )
 
 var HitBTC *hitbtc.HitBTC
 var Binance *binance.Binance
 
-func setupExchange() {
-	var err error
-
-	HitBTC, err = binance.New("YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	Binance, err = binance.New("YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY")
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
 func main() {
-	setupExchange()
+	HitBTC = hitbtc.New()
+	HitBTC.PublicKey, HitBTC.SecretKey = "YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY"
+	Binance = binance.New()
+	Binance.PublicKey, Binance.SecretKey = "YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY"
 
 	SubscribeReports()
 	SubscribeCandles()
-	UnsubscribeCandles()
 }
 
 func SubscribeReports() {
-	var (
-		err error
-		hitbtcReports, binanceReports <-chan interface{}
-	)
+	defer func() {
+		err := HitBTC.UnsubscribeReports()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	hitbtcReports, err = HitBTC.SubscribeReports()
+		err = Binance.UnsubscribeReports()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	err := HitBTC.SubscribeReports(
+		func(response interface{}) {
+			log.Println(response)
+		})
 	if err != nil {
 		log.Panic(err)
 	}
 
-	binanceReports, err = Binance.SubscribeReports()
+	err = Binance.SubscribeReports(
+		func(response interface{}) {
+			log.Println(response)
+		})
 	if err != nil {
 		log.Panic(err)
 	}
-
-	log.Println(<-hitbtcReports)
-	log.Println(<-binanceReports)
 }
 
 func SubscribeCandles() {
-	var (
-		err error
-		hitbtcCandles, binanceCandles <-chan interface{}
-	)
+	hitbtcParams := hitbtc.CandlesParams{
+		Symbol: hitbtc.BTC + hitbtc.USD,
+		Period: hitbtc.Period1Minute,
+	}
+	binanceParams := binance.CandlesParams{
+		Symbol: binance.BNB + binance.USD,
+		Period: binance.Period1Minute,
+	}
+	defer func() {
+		err := HitBTC.UnsubscribeCandles(hitbtcParams)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	hitbtcCandles, err = HitBTC.SubscribeCandles(
-		hitbtc.CandlesParams{
-			Limit:  100,
-			Symbol: hitbtc.Demo,
-			Period: hitbtc.Period1Minute,
+		err = Binance.UnsubscribeCandles(binanceParams)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	err := HitBTC.SubscribeCandles(
+		hitbtcParams, func(response interface{}) {
+			log.Println(response)
 		})
 	if err != nil {
 		log.Panic(err)
 	}
 
-	binanceCandles, err = Binance.SubscribeCandles(
-		binance.CandlesParams{
-			Symbol: binance.Demo,
-			Period: binance.Period1Minute,
-		})
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Println(<-hitbtcCandles)
-	log.Println(<-binanceCandles)
-}
-
-func UnsubscribeCandles() {
-	err := HitBTC.UnsubscribeCandles(
-		hitbtc.CandlesParams{
-			Symbol: hitbtc.Demo,
-		})
-	if err != nil {
-		log.Panic(err)
-	}
-
-	err = Binance.UnsubscribeCandles(
-		binance.CandlesParams{
-		    Symbol: hitbtc.Demo,
+	err = Binance.SubscribeCandles(
+		binanceParams, func(response interface{}) {
+			log.Println(response)
 		})
 	if err != nil {
 		log.Panic(err)
@@ -144,40 +134,31 @@ An example convert is shown below:
 import (
 	"log"
 
+	"github.com/ramezanius/crypex/exchange/binance"
 	"github.com/ramezanius/crypex/exchange/hitbtc"
-	"github.com/ramezanius/crypex/exchange/hitbtc/converter"
+	"github.com/ramezanius/crypex/exchange/tests"
+
+	BinanceConverter "github.com/ramezanius/crypex/exchange/binance/converter"
+	HitBTCConverter "github.com/ramezanius/crypex/exchange/hitbtc/converter"
 )
 
 func main() {
-	ToUSD()
-}
+	// You should define your own repository.
+	cache := &tests.Repository{}
 
-const price, quantity = 10000.0, 10.0
-
-type repository struct{}
-
-// GetPrice returns fake price (BTC/USD)
-func (r *repository) GetPrice(_, _ string) float64 {
-	return price
-}
-
-// GetSymbol returns fake symbol detail (BTC/USD)[Demo]
-func (r *repository) GetSymbol(_, _ string) interface{} {
-	return &hitbtc.Symbol{
-		Base:  hitbtc.BTC,
-		Quote: hitbtc.USD,
-		ID:    hitbtc.Demo,
+	hitbtcValue, err := HitBTCConverter.ToUSD(cache, hitbtc.BTC, 56, false)
+	if err != nil {
+		log.Fatal(err)
 	}
-}
 
-func ToUSD() {
-	cache := &repository{}
-	value, err := converter.ToUSD(cache, hitbtc.BTC, quantity, false)
-    if err != nil {
-        log.Fatal(err)
-    }
+	log.Println(hitbtcValue)
 
-	log.Println(value)
+	binanceValue, err := BinanceConverter.ToUSD(cache, binance.BTC, 24, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(binanceValue)
 }
 
 ```
