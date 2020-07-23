@@ -1,12 +1,12 @@
 package converter
 
 import (
-	"fmt"
-
-	"github.com/forestgiant/sliceutil"
-
 	"github.com/ramezanius/crypex/exchange/binance"
+	"github.com/ramezanius/crypex/exchange/hitbtc"
+	"github.com/ramezanius/crypex/exchange/util"
 )
+
+var binanceCurrencies = []string{binance.USD, binance.BTC, binance.ETH, binance.BNB}
 
 // Repository caching exchange repository
 type Repository interface {
@@ -16,10 +16,17 @@ type Repository interface {
 }
 
 // ToSymbol convert an currency to available pair.
-func ToSymbol(cache Repository, currency string) (symbol *binance.Symbol) {
-	baseCurrencies := []string{binance.USD, binance.BTC, binance.ETH, binance.BNB}
+func ToSymbol(cache Repository, currency string) (symbol *binance.Symbol, err error) {
+	if len(currency) >= 6 {
+		symbol = cache.GetSymbol(currency, binance.Exchange).(*binance.Symbol)
+		if symbol.ID == "" {
+			return nil, hitbtc.ErrSymbolNotFound
+		}
 
-	if sliceutil.Contains(baseCurrencies, currency) {
+		return
+	}
+
+	if util.Contains(binanceCurrencies, currency) {
 		symbol = &binance.Symbol{
 			Base:  currency,
 			Quote: binance.USD,
@@ -29,17 +36,19 @@ func ToSymbol(cache Repository, currency string) (symbol *binance.Symbol) {
 			symbol.Base = binance.BTC
 		}
 
+		symbol.ID = symbol.Base + symbol.Quote
+
 		return
 	}
 
-	for _, base := range baseCurrencies {
+	for _, base := range binanceCurrencies {
 		symbol = cache.GetSymbol(currency+base, binance.Exchange).(*binance.Symbol)
 		if symbol.ID != "" {
-			break
+			return
 		}
 	}
 
-	return
+	return nil, binance.ErrCurrencyNotFound
 }
 
 // ToUSD convert any value of symbol(name) to binance.USD.
@@ -53,7 +62,10 @@ func ToUSD(cache Repository, name string, value float64, pure bool) (result floa
 		return value * BaseUsd, err
 	}
 
-	symbol := ToSymbol(cache, name)
+	symbol, err := ToSymbol(cache, name)
+	if err != nil {
+		return 0, err
+	}
 
 	switch symbol.Quote {
 	case binance.USD:
@@ -91,7 +103,7 @@ func ToUSD(cache Repository, name string, value float64, pure bool) (result floa
 		}
 
 		return value * BnbUsd, err
+	default:
+		return value, nil
 	}
-
-	return value, fmt.Errorf("crypex: binance converter: qoute currency is not valid")
 }

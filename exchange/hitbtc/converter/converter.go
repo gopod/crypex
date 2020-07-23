@@ -1,11 +1,9 @@
 package converter
 
 import (
-	"fmt"
-
-	"github.com/forestgiant/sliceutil"
-
+	"github.com/ramezanius/crypex/exchange/binance"
 	"github.com/ramezanius/crypex/exchange/hitbtc"
+	"github.com/ramezanius/crypex/exchange/util"
 )
 
 var hitbtcCurrencies = []string{hitbtc.USD, hitbtc.BTC, hitbtc.ETH}
@@ -19,7 +17,16 @@ type Repository interface {
 
 // ToSymbol convert an currency to available pair.
 func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol, err error) {
-	if sliceutil.Contains(hitbtcCurrencies, currency) {
+	if len(currency) >= 6 {
+		symbol = cache.GetSymbol(currency, hitbtc.Exchange).(*hitbtc.Symbol)
+		if symbol.ID == "" {
+			return nil, binance.ErrSymbolNotFound
+		}
+
+		return
+	}
+
+	if util.Contains(hitbtcCurrencies, currency) {
 		symbol = &hitbtc.Symbol{
 			Base:  currency,
 			Quote: hitbtc.USD,
@@ -28,6 +35,8 @@ func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol, err err
 		if symbol.Base == hitbtc.USD {
 			symbol.Base = hitbtc.BTC
 		}
+
+		symbol.ID = symbol.Base + symbol.Quote
 
 		return
 	}
@@ -39,7 +48,7 @@ func ToSymbol(cache Repository, currency string) (symbol *hitbtc.Symbol, err err
 		}
 	}
 
-	return nil, fmt.Errorf("crypex: currency not found")
+	return nil, hitbtc.ErrCurrencyNotFound
 }
 
 // ToUSD convert any value of symbol(name) to hitbtc.USD.
@@ -85,7 +94,7 @@ func ToUSD(cache Repository, name string, value float64, pure bool) (result floa
 		}
 
 		return value * EthUsd, err
+	default:
+		return value, nil
 	}
-
-	return value, fmt.Errorf("crypex: hitbtc converter: qoute currency is not valid")
 }
