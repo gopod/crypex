@@ -177,6 +177,7 @@ This will then make the following packages available to you:
     github.com/ramezanius/crypex/exchange/hitbtc
     github.com/ramezanius/crypex/exchange/hitbtc/converter
     github.com/ramezanius/crypex/exchange/binance
+    github.com/ramezanius/crypex/exchange/binance/converter
 
 ------
 
@@ -192,7 +193,7 @@ Supported exchanges
 
 Exchange | Stream methods | API methods
 :-:|:-:|:-:
-HitBTC | `Candles`, `Reports` | `NewOrder`, `ReplaceOrder`, `CancelOrder`, <br/> `GetSymbol`, `GetSymbols`, `GetBalances`
+HitBTC | `Candles`, `Reports` | `NewOrder`, `CancelOrder`, `GetSymbols`, `GetBalances`
 Binance | `Klines`, `Reports` | `NewOrder`, `CancelOrder`, `GetSymbols`, `GetBalances`
 
 ------
