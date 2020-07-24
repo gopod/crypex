@@ -1,18 +1,15 @@
 package hitbtc
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 
-	"github.com/cskr/pubsub"
 	"github.com/gorilla/websocket"
-	"github.com/ramezanius/jsonrpc2"
-	ws "github.com/ramezanius/jsonrpc2/websocket"
 
 	"github.com/ramezanius/crypex/exchange"
+	"github.com/ramezanius/crypex/exchange/binance"
 )
 
 const (
@@ -20,37 +17,34 @@ const (
 	streamURL = "wss://api.hitbtc.com/api/2/ws"
 )
 
-// New create a new hitbtc instance.
-func New(public, secret string) (*HitBTC, error) {
-	feeds := &Feeds{pubsub.New(1)}
-	hitbtc := &HitBTC{
-		Feeds: feeds,
+// New returns a new hitbtc.
+func New() *HitBTC {
+	return &HitBTC{
+		connections: make(map[string]*websocket.Conn),
 	}
+}
 
-	conn, _, err := websocket.DefaultDialer.Dial(streamURL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	hitbtc.Connection = jsonrpc2.NewConn(
-		context.Background(),
-		ws.NewObjectStream(conn),
-		jsonrpc2.AsyncHandler(feeds),
-	)
-
-	if public != "" && secret != "" {
-		hitbtc.PublicKey, hitbtc.SecretKey = public, secret
-		err = hitbtc.Authenticate()
+// Shutdown closes the underlying network connections.
+func (h *HitBTC) Shutdown() error {
+	for _, conn := range h.connections {
+		err := exchange.CloseConn(conn)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return hitbtc, nil
+	h.connections = make(map[string]*websocket.Conn)
+
+	return nil
 }
 
-// authenticate sends a request for authorize instance.
-func (h *HitBTC) Authenticate() (err error) {
+// Authenticate authenticates a pair of public and secret key
+// with the websocket connection.
+func (h *HitBTC) Authenticate(conn *websocket.Conn) (err error) {
+	if h.PublicKey == "" || h.SecretKey == "" {
+		return ErrKeysNotSet
+	}
+
 	params := struct {
 		PublicKey string `json:"pKey,required"`
 		SecretKey string `json:"sKey,required"`
@@ -61,23 +55,20 @@ func (h *HitBTC) Authenticate() (err error) {
 		Algorithm: "BASIC",
 	}
 
-	err = h.Stream(exchange.StreamParams{
+	err = conn.WriteJSON(exchange.StreamParams{
 		Method: "login",
 		Params: params,
-	}, nil)
+	})
 
 	return
 }
 
-// Shutdown removes and closes subscribed channels.
-func (h *HitBTC) Shutdown() error {
-	h.Feeds.Shutdown()
-
-	return h.Connection.Close()
-}
-
-// request sends an http request.
+// Request sends an HTTP request and returns an HTTP response.
 func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) error {
+	if request.Auth && h.PublicKey == "" || h.SecretKey == "" {
+		return binance.ErrKeysNotSet
+	}
+
 	parsedURL, _ := url.ParseRequestURI(apiURL)
 	parsedURL.Path = parsedURL.Path + request.Endpoint
 
@@ -102,7 +93,7 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 		req.SetBasicAuth(h.PublicKey, h.SecretKey)
 	}
 
-	req.Header.Add("Content-type", "application/json")
+	req.Header.Add("Content-type", "application/x-www-form-urlencoded")
 	res, err := http.DefaultClient.Do(req)
 
 	defer func() {
@@ -113,14 +104,10 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 	}()
 
 	if res.StatusCode != 200 {
-		e := APIError{}
+		e := &APIError{}
+		_ = json.NewDecoder(res.Body).Decode(&e)
 
-		err = json.NewDecoder(res.Body).Decode(&e)
-		if err != nil {
-			return err
-		}
-
-		return fmt.Errorf(e.String())
+		return e
 	}
 
 	if response != nil {
@@ -130,9 +117,29 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 	return err
 }
 
-// Stream sends a request to websocket connection.
-func (h *HitBTC) Stream(request exchange.StreamParams, response interface{}) error {
-	return h.Connection.Call(
-		context.Background(), request.Method, request.Params, &response,
-	)
+// Stream returns a new connection and writes a request
+// to the connection if there's a method.
+func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
+	conn, err := exchange.NewConn(streamURL, request.Endpoint, h.read, handler)
+	if err != nil {
+		return err
+	}
+
+	if request.Auth {
+		err := h.Authenticate(conn)
+		if err != nil {
+			return err
+		}
+	}
+
+	if request.Method != "" {
+		err = conn.WriteJSON(request)
+		if err != nil {
+			return err
+		}
+	}
+
+	h.connections[request.Location] = conn
+
+	return nil
 }

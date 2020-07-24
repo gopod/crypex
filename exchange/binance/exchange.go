@@ -1,102 +1,53 @@
 package binance
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"time"
 
-	"github.com/cskr/pubsub"
 	"github.com/gorilla/websocket"
-	"github.com/ramezanius/jsonrpc2"
-	ws "github.com/ramezanius/jsonrpc2/websocket"
 
 	"github.com/ramezanius/crypex/exchange"
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
 const (
-	apiURL    = "https://api.binance.com/api/v3"
-	streamURL = "wss://stream.binance.com:9443/ws"
-
 	recvWindow = "5000"
 	keepAlive  = 30 * time.Minute
+
+	apiURL    = "https://api.binance.com/api/v3"
+	streamURL = "wss://stream.binance.com:9443/ws"
 )
 
-// New create a new binance instance.
-func New(public, secret string) (*Binance, error) {
-	feeds := &Feeds{pubsub.New(1)}
-	binance := &Binance{
-		Feeds: feeds,
+// New returns a new binance.
+func New() *Binance {
+	return &Binance{
+		connections: make(map[string]*websocket.Conn),
 	}
-
-	if public != "" && secret != "" {
-		binance.PublicKey, binance.SecretKey = public, secret
-		err := binance.Authenticate()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	conn, _, err := websocket.DefaultDialer.Dial(streamURL+"/"+binance.ListenKey, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	binance.Connection = jsonrpc2.NewConn(
-		context.Background(),
-		ws.NewObjectStream(conn),
-		jsonrpc2.AsyncHandler(feeds),
-	)
-
-	// Serialize event to JSON-RPC message
-	jsonrpc2.MessageSerializer = func(data []byte) ([]byte, error) {
-		var payload map[string]json.RawMessage
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return nil, err
-		}
-
-		var (
-			ok     bool
-			method json.RawMessage
-		)
-
-		if method, ok = payload["e"]; !ok {
-			return data, nil
-		}
-
-		var msg struct {
-			Result interface{} `json:"params"`
-
-			Method json.RawMessage `json:"method"`
-		}
-
-		delete(payload, "e")
-		delete(payload, "E")
-		msg.Method, msg.Result = method, payload
-
-		output, err := json.Marshal(msg)
-		if err != nil {
-			return nil, err
-		}
-
-		return output, nil
-	}
-
-	return binance, nil
 }
 
-// Shutdown removes and closes subscribed channels.
+// Shutdown closes the underlying network connections.
 func (b *Binance) Shutdown() error {
-	b.Feeds.Shutdown()
+	for _, conn := range b.connections {
+		err := exchange.CloseConn(conn)
+		if err != nil {
+			return err
+		}
+	}
 
-	return b.Connection.Close()
+	b.connections = make(map[string]*websocket.Conn)
+
+	return nil
 }
 
-// Authenticate sends a request for authorize instance.
+// Authenticate creates an listen key and keeps it alive.
 func (b *Binance) Authenticate() (err error) {
+	if b.PublicKey == "" || b.SecretKey == "" {
+		return ErrKeysNotSet
+	}
+
 	var response map[string]string
 
 	// Send a POST request to create a listen key.
@@ -115,28 +66,22 @@ func (b *Binance) Authenticate() (err error) {
 
 		for range ticker.C {
 			b.Lock()
-			if b.ListenKey == "" {
-				continue
-			}
 
-			err = b.Request(exchange.RequestParams{
+			_ = b.Request(exchange.RequestParams{
 				Method: "PUT", Endpoint: "/userDataStream",
 				Params: map[string]string{
 					"listenKey": b.ListenKey,
 				},
 			}, nil)
-			if err != nil {
-				return
-			}
 
 			b.Unlock()
 		}
 	}()
 
-	return err
+	return nil
 }
 
-// request sends an http request.
+// Request sends an HTTP request and returns an HTTP response.
 func (b *Binance) Request(request exchange.RequestParams, response interface{}) error {
 	parsedURL, _ := url.ParseRequestURI(apiURL)
 	parsedURL.Path = parsedURL.Path + request.Endpoint
@@ -166,11 +111,17 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 		parsedURL.RawQuery = q.Encode()
 	}
 
-	req, _ := http.NewRequest(request.Method, parsedURL.String(), nil)
+	req, err := http.NewRequest(request.Method, parsedURL.String(), nil)
+	if err != nil {
+		return err
+	}
 
 	req.Header.Add("Content-type", "application/json")
 	req.Header.Add("X-MBX-APIKEY", b.PublicKey)
 	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
 
 	defer func() {
 		err = res.Body.Close()
@@ -180,33 +131,40 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 	}()
 
 	if res.StatusCode != 200 {
-		e := APIError{}
+		err = &APIError{}
+		_ = json.NewDecoder(res.Body).Decode(&err)
 
-		err = json.NewDecoder(res.Body).Decode(&e)
-		if err != nil {
-			return err
-		}
-
-		return fmt.Errorf(e.String())
+		return err
 	}
 
 	if response != nil {
 		err = json.NewDecoder(res.Body).Decode(&response)
 	}
 
-	return err
+	return nil
 }
 
-// Stream sends a request to websocket connection.
-func (b *Binance) Stream(request exchange.StreamParams, response interface{}) error {
+// Stream returns a new connection with a specific endpoint.
+func (b *Binance) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
 	if request.Auth {
 		err := b.Authenticate()
 		if err != nil {
 			return err
 		}
+
+		request.Endpoint = b.ListenKey
 	}
 
-	return b.Connection.Call(
-		context.Background(), request.Method, request.Params, &response,
-	)
+	conn, err := exchange.NewConn(streamURL, request.Endpoint, b.read, handler)
+	if err != nil {
+		return err
+	}
+
+	if request.Location == "" {
+		request.Location = request.Endpoint
+	}
+
+	b.connections[request.Location] = conn
+
+	return nil
 }

@@ -12,21 +12,18 @@ import (
 
 type hitbtcSuite struct {
 	suite.Suite
-	Exchange *hitbtc.HitBTC
+	exchange *hitbtc.HitBTC
 }
 
 func (suite *hitbtcSuite) SetupSuite() {
-	exchange, err := hitbtc.New(
-		os.Getenv("HITBTC_PUBLIC_KEY"),
-		os.Getenv("HITBTC_SECRET_KEY"),
-	)
-	suite.NoError(err)
+	suite.exchange = hitbtc.New()
 
-	suite.Exchange = exchange
+	suite.exchange.PublicKey = os.Getenv("HITBTC_PUBLIC_KEY")
+	suite.exchange.SecretKey = os.Getenv("HITBTC_SECRET_KEY")
 }
 
 func (suite *hitbtcSuite) TearDownSuite() {
-	assert.NoError(suite.T(), suite.Exchange.Shutdown())
+	assert.NoError(suite.T(), suite.exchange.Shutdown())
 }
 
 func TestHitBTC(t *testing.T) {
