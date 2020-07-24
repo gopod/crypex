@@ -101,6 +101,10 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 	}
 
 	if request.Auth {
+		if b.PublicKey == "" || b.SecretKey == "" {
+			return ErrKeysNotSet
+		}
+
 		q.Add("recvWindow", recvWindow)
 		// Timestamp is mandatory in signed request
 		q.Add("timestamp", fmt.Sprintf("%v", time.Now().Unix()*1000))
