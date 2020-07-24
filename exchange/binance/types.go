@@ -2,21 +2,17 @@ package binance
 
 import (
 	"encoding/json"
+	"strconv"
 	"sync"
 	"time"
 
-	"github.com/cskr/pubsub"
-	"github.com/ramezanius/jsonrpc2"
+	"github.com/gorilla/websocket"
 	"github.com/spf13/cast"
 )
 
 const (
 	// Exchange name
 	Exchange = "Binance"
-
-	// Exchange feeds
-	ReportsFeed = "REPORTS"
-	CandlesFeed = "CANDLES::"
 
 	// Exchange periods
 	Period1Day     Period = "1d"
@@ -51,31 +47,24 @@ const (
 	ImmediateOrCancel TimeInForce = "IOC"
 
 	// Exchange base currencies
-	USD  = "usdt"
-	BTC  = "btc"
-	ETH  = "eth"
-	BNB  = "bnb"
-	Demo = BTC + USD
+	USD = "usdt"
+	BTC = "btc"
+	ETH = "eth"
+	XRP = "xrp"
+	BNB = "bnb"
 )
 
-// Binance exchange
+// Binance exchange struct
 type Binance struct {
 	sync.RWMutex
 
-	// Feeds collection
-	Feeds *Feeds
-	// Websocket connection
-	Connection *jsonrpc2.Conn
+	// Websocket connections
+	connections map[string]*websocket.Conn
 
-	// Public API key, Secret API key
-	PublicKey, SecretKey string
 	// Websocket listen key
 	ListenKey string
-}
-
-// Feeds struct
-type Feeds struct {
-	*pubsub.PubSub
+	// Public API key, Secret API key
+	PublicKey, SecretKey string
 }
 
 // Type order type
@@ -104,7 +93,7 @@ type Symbols []Symbol
 type Asset struct {
 	Currency string `json:"asset,required"`
 
-	Lock float64 `json:"locked,string"` // "0.00000000" may occurs error!
+	Lock float64 `json:"locked,string"`
 	Free float64 `json:"free,string"`
 }
 
@@ -138,8 +127,8 @@ func (r *ReportsResponse) UnmarshalJSON(data []byte) error {
 		Status          string      `json:"x,required"`
 		Quantity        float64     `json:"q,string"`
 		StopPrice       float64     `json:"P,string"`
-		CreatedAt       int64       `json:"O,required"`
-		UpdatedAt       int64       `json:"T,required"`
+		CreatedAt       int         `json:"O,required"`
+		UpdatedAt       int         `json:"T,required"`
 		TimeInForce     TimeInForce `json:"f,required"`
 		OrderID         string      `json:"c,required"`
 		OriginalOrderID string      `json:"C,omitempty"`
@@ -155,22 +144,26 @@ func (r *ReportsResponse) UnmarshalJSON(data []byte) error {
 	r.Price = v.Price
 	r.Symbol = v.Symbol
 	r.Status = v.Status
+	r.OrderID = v.OrderID
 	r.Quantity = v.Quantity
 	r.StopPrice = v.StopPrice
 	r.TimeInForce = v.TimeInForce
-	r.OrderID = v.OrderID
 	r.OriginalOrderID = v.OriginalOrderID
 
-	createdAt := time.Unix(v.CreatedAt, 0)
-	r.CreatedAt = &createdAt
+	if v.UpdatedAt == -1 {
+		v.UpdatedAt = v.CreatedAt
+	}
 
-	updatedAt := time.Unix(v.UpdatedAt, 0)
+	createdAt := time.Unix(cast.ToInt64(strconv.Itoa(v.CreatedAt)[:10]), 0)
+	updatedAt := time.Unix(cast.ToInt64(strconv.Itoa(v.UpdatedAt)[:10]), 0)
+
+	r.CreatedAt = &createdAt
 	r.UpdatedAt = &updatedAt
 
 	return nil
 }
 
-// Report struct
+// Order struct
 type Order struct {
 	ID              int64       `json:"orderId,required"`
 	Side            Side        `json:"side,required"`
@@ -180,14 +173,13 @@ type Order struct {
 	Status          string      `json:"status,required"`
 	Quantity        float64     `json:"origQty,string"`
 	StopPrice       float64     `json:"stopPrice,omitempty"`
-	CreatedAt       *time.Time  `json:"time,omitempty"`
-	UpdatedAt       *time.Time  `json:"updateTime,omitempty"`
+	TransactAt      *time.Time  `json:"transactTime,omitempty"`
 	TimeInForce     TimeInForce `json:"timeInForce,required"`
 	OrderID         string      `json:"clientOrderId,required"`
 	OriginalOrderID string      `json:"origClientOrderId,omitempty"`
 }
 
-func (r *Order) UnmarshalJSON(data []byte) error {
+func (r *OrderResponse) UnmarshalJSON(data []byte) error {
 	var v struct {
 		ID              int64       `json:"orderId,required"`
 		Side            Side        `json:"side,required"`
@@ -197,8 +189,7 @@ func (r *Order) UnmarshalJSON(data []byte) error {
 		Status          string      `json:"status,required"`
 		Quantity        float64     `json:"origQty,string"`
 		StopPrice       float64     `json:"stopPrice,omitempty"`
-		CreatedAt       int64       `json:"time,omitempty"`
-		UpdatedAt       int64       `json:"updateTime,omitempty"`
+		TransactAt      int         `json:"transactTime,omitempty"`
 		TimeInForce     TimeInForce `json:"timeInForce,required"`
 		OrderID         string      `json:"clientOrderId,required"`
 		OriginalOrderID string      `json:"origClientOrderId,omitempty"`
@@ -214,17 +205,16 @@ func (r *Order) UnmarshalJSON(data []byte) error {
 	r.Price = v.Price
 	r.Symbol = v.Symbol
 	r.Status = v.Status
+	r.OrderID = v.OrderID
 	r.Quantity = v.Quantity
 	r.StopPrice = v.StopPrice
 	r.TimeInForce = v.TimeInForce
-	r.OrderID = v.OrderID
 	r.OriginalOrderID = v.OriginalOrderID
 
-	createdAt := time.Unix(v.CreatedAt, 0)
-	r.CreatedAt = &createdAt
-
-	updatedAt := time.Unix(v.UpdatedAt, 0)
-	r.UpdatedAt = &updatedAt
+	if v.TransactAt != 0 {
+		transactAt := time.Unix(cast.ToInt64(strconv.Itoa(v.TransactAt)[:10]), 0)
+		r.TransactAt = &transactAt
+	}
 
 	return nil
 }
@@ -238,8 +228,6 @@ type Candle struct {
 	Open        float64    `json:"o,string"`
 	Close       float64    `json:"c,string"`
 	Closed      bool       `json:"x,required"`
-	Symbol      string     `json:"s,required"`
-	Period      string     `json:"i,required"`
 	Volume      float64    `json:"v,string"`
 	QuoteVolume float64    `json:"q,string"`
 }
@@ -251,8 +239,8 @@ func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
 	var v struct {
 		Symbol string `json:"s,required"`
 		Candle struct {
-			StartAt     int64       `json:"t,required"`
-			EndAt       int64       `json:"T,required"`
+			StartAt     int         `json:"t,required"`
+			EndAt       int         `json:"T,required"`
 			Max         interface{} `json:"h,required"`
 			Min         interface{} `json:"l,required"`
 			Open        interface{} `json:"o,required"`
@@ -269,10 +257,9 @@ func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
 	}
 
 	r.Symbol = v.Symbol
-	r.Candle.Closed = v.Candle.Closed
-	r.Candle.Symbol = v.Candle.Symbol
-	r.Candle.Period = v.Candle.Period
+	r.Period = Period(v.Candle.Period)
 
+	r.Candle.Closed = v.Candle.Closed
 	r.Candle.Min = cast.ToFloat64(v.Candle.Min.(string))
 	r.Candle.Max = cast.ToFloat64(v.Candle.Max.(string))
 	r.Candle.Open = cast.ToFloat64(v.Candle.Open.(string))
@@ -280,8 +267,8 @@ func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
 	r.Candle.Volume = cast.ToFloat64(v.Candle.Volume.(string))
 	r.Candle.QuoteVolume = cast.ToFloat64(v.Candle.QuoteVolume.(string))
 
-	endAt := time.Unix(v.Candle.EndAt, 0)
-	startAt := time.Unix(v.Candle.StartAt, 0)
+	endAt := time.Unix(cast.ToInt64(strconv.Itoa(v.Candle.EndAt)[:10]), 0)
+	startAt := time.Unix(cast.ToInt64(strconv.Itoa(v.Candle.StartAt)[:10]), 0)
 
 	r.Candle.EndAt = &endAt
 	r.Candle.StartAt = &startAt

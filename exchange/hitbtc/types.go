@@ -1,11 +1,11 @@
 package hitbtc
 
 import (
-	"sync"
+	"encoding/json"
 	"time"
 
-	"github.com/cskr/pubsub"
-	"github.com/ramezanius/jsonrpc2"
+	"github.com/gorilla/websocket"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -33,28 +33,19 @@ const (
 	StopMarket Type = "stopMarket"
 
 	// Exchange base currencies
-	USD  = "USD"
-	BTC  = "BTC"
-	ETH  = "ETH"
-	Demo = BTC + USD
+	USD = "USD"
+	BTC = "BTC"
+	ETH = "ETH"
+	XRP = "XRP"
 )
 
 // HitBTC exchange struct
 type HitBTC struct {
-	sync.RWMutex
-
-	// Feeds collection
-	Feeds *Feeds
-	// Websocket connection
-	Connection *jsonrpc2.Conn
+	// Websocket connections
+	connections map[string]*websocket.Conn
 
 	// Public API key, Secret API key
 	PublicKey, SecretKey string
-}
-
-// Feeds struct
-type Feeds struct {
-	*pubsub.PubSub
 }
 
 // Period candles period type
@@ -89,7 +80,7 @@ type Assets []Asset
 
 // Report struct
 type Report struct {
-	ID    int64   `json:"id,string"`
+	ID    int64   `json:"id,int,string"`
 	Side  Side    `json:"side,required"`
 	Type  Type    `json:"type,required"`
 	Price float64 `json:"price,string"`
@@ -97,14 +88,55 @@ type Report struct {
 	Symbol    string  `json:"symbol,required"`
 	Status    string  `json:"status,required"`
 	Quantity  float64 `json:"quantity,string"`
-	StopPrice bool    `json:"stopPrice,required"`
+	StopPrice bool    `json:"stopPrice,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt,required"`
 	UpdatedAt time.Time `json:"updatedAt,required"`
 
-	TimeInForce     string `json:"timeInForce,required"`
+	TimeInForce     string `json:"timeInForce,omitempty"`
 	OrderID         string `json:"clientOrderId,required"`
-	OriginalOrderID string `json:"originalRequestClientOrderId,required"`
+	OriginalOrderID string `json:"originalRequestClientOrderId,omitempty"`
+}
+
+func (r *ReportsResponse) UnmarshalJSON(data []byte) error {
+	var v struct {
+		ID    interface{} `json:"id,required"`
+		Side  Side        `json:"side,required"`
+		Type  Type        `json:"type,required"`
+		Price float64     `json:"price,string"`
+
+		Symbol    string  `json:"symbol,required"`
+		Status    string  `json:"status,required"`
+		Quantity  float64 `json:"quantity,string"`
+		StopPrice bool    `json:"stopPrice,omitempty"`
+
+		CreatedAt time.Time `json:"createdAt,required"`
+		UpdatedAt time.Time `json:"updatedAt,required"`
+
+		TimeInForce     string `json:"timeInForce,omitempty"`
+		OrderID         string `json:"clientOrderId,required"`
+		OriginalOrderID string `json:"originalRequestClientOrderId,omitempty"`
+	}
+
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	r.ID = cast.ToInt64(v.ID)
+	r.Side = v.Side
+	r.Type = v.Type
+	r.Price = v.Price
+	r.Symbol = v.Symbol
+	r.Status = v.Status
+	r.OrderID = v.OrderID
+	r.Quantity = v.Quantity
+	r.StopPrice = v.StopPrice
+	r.CreatedAt = v.CreatedAt
+	r.UpdatedAt = v.UpdatedAt
+	r.TimeInForce = v.TimeInForce
+	r.OriginalOrderID = v.OriginalOrderID
+
+	return nil
 }
 
 // Candle struct
@@ -121,3 +153,24 @@ type Candle struct {
 
 // Candles struct
 type Candles []Candle
+
+func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
+	var v struct {
+		Candles Candles `json:"data,required"`
+		Symbol  string  `json:"symbol,required"`
+		Period  string  `json:"period,required"`
+	}
+
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	r.Symbol = v.Symbol
+	r.Period = v.Period
+
+	if len(v.Candles) != 0 {
+		r.Candle = v.Candles[0]
+	}
+
+	return nil
+}
