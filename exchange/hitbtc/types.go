@@ -2,6 +2,7 @@ package hitbtc
 
 import (
 	"encoding/json"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -41,6 +42,8 @@ const (
 
 // HitBTC exchange struct
 type HitBTC struct {
+	sync.RWMutex
+
 	// Websocket connections
 	connections map[string]*websocket.Conn
 
