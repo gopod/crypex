@@ -45,6 +45,9 @@ func (h *HitBTC) SubscribeReports(handler exchange.HandlerFunc) (err error) {
 
 // UnsubscribeCandles unsubscribes from reports.
 func (h *HitBTC) UnsubscribeReports() (err error) {
+	h.Lock()
+	defer h.Unlock()
+
 	err = exchange.CloseConn(h.connections[h.SecretKey])
 	h.connections[h.SecretKey] = nil
 
@@ -78,6 +81,9 @@ func (h *HitBTC) SubscribeCandles(params CandlesParams, handler exchange.Handler
 // UnsubscribeCandles unsubscribes from candles.
 func (h *HitBTC) UnsubscribeCandles(params CandlesParams) (err error) {
 	location := fmt.Sprintf("%s@candle_%s", strings.ToLower(params.Symbol), params.Period)
+
+	h.Lock()
+	defer h.Unlock()
 
 	err = exchange.CloseConn(h.connections[location])
 	h.connections[location] = nil

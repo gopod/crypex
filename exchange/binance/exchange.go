@@ -168,7 +168,9 @@ func (b *Binance) Stream(request exchange.StreamParams, handler exchange.Handler
 		request.Location = request.Endpoint
 	}
 
+	b.Lock()
 	b.connections[request.Location] = conn
+	b.Unlock()
 
 	return nil
 }

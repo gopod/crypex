@@ -138,7 +138,9 @@ func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerF
 		}
 	}
 
+	h.Lock()
 	h.connections[request.Location] = conn
+	h.Unlock()
 
 	return nil
 }

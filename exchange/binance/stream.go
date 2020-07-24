@@ -41,6 +41,9 @@ func (b *Binance) SubscribeReports(handler exchange.HandlerFunc) (err error) {
 
 // UnsubscribeCandles unsubscribes from reports.
 func (b *Binance) UnsubscribeReports() (err error) {
+	b.Lock()
+	defer b.Unlock()
+
 	err = exchange.CloseConn(b.connections[b.ListenKey])
 	b.connections[b.ListenKey] = nil
 
@@ -72,6 +75,9 @@ func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.Handle
 // UnsubscribeCandles unsubscribes from candles.
 func (b *Binance) UnsubscribeCandles(params CandlesParams) (err error) {
 	location := fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period)
+
+	b.Lock()
+	defer b.Unlock()
 
 	err = exchange.CloseConn(b.connections[location])
 	b.connections[location] = nil
