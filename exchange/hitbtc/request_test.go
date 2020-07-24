@@ -1,23 +1,18 @@
 package hitbtc_test
 
-import "github.com/ramezanius/crypex/exchange/hitbtc"
-
-func (suite *hitbtcSuite) TestGetSymbol() {
-	symbol, err := suite.Exchange.GetSymbol(hitbtc.Demo)
-
-	suite.NoError(err)
-	suite.NotEmpty(symbol)
-}
+import (
+	"github.com/ramezanius/crypex/exchange/hitbtc"
+)
 
 func (suite *hitbtcSuite) TestGetSymbols() {
-	symbols, err := suite.Exchange.GetSymbols()
+	symbols, err := suite.exchange.GetSymbols()
 
 	suite.NoError(err)
 	suite.NotEmpty(symbols)
 }
 
 func (suite *hitbtcSuite) TestGetBalances() {
-	balances, err := suite.Exchange.GetBalances()
+	balances, err := suite.exchange.GetBalances()
 
 	suite.NoError(err)
 	suite.NotEmpty(balances)
@@ -30,15 +25,12 @@ func (suite *hitbtcSuite) TestOrders() {
 
 		Side:   hitbtc.Buy,
 		Type:   hitbtc.Limit,
-		Symbol: hitbtc.Demo,
-	}
-	replaceRequest := hitbtc.ReplaceOrder{
-		Price:    1000,
-		Quantity: 0.00001,
+		Symbol: hitbtc.BTC + hitbtc.USD,
 	}
 
 	suite.Run("NewOrder", func() {
-		order, err := suite.Exchange.NewOrder(newRequest)
+		suite := suite
+		order, err := suite.exchange.NewOrder(newRequest)
 
 		suite.NoError(err)
 		suite.NotEmpty(order)
@@ -47,23 +39,28 @@ func (suite *hitbtcSuite) TestOrders() {
 		suite.Equal(order.Price, newRequest.Price)
 		suite.Equal(order.Quantity, newRequest.Quantity)
 
-		replaceRequest.OrderID = order.OrderID
-	})
-	suite.Run("ReplaceOrder", func() {
-		order, err := suite.Exchange.ReplaceOrder(replaceRequest)
-
-		suite.NoError(err)
-		suite.NotEmpty(order)
-
-		suite.Equal(order.Price, replaceRequest.Price)
-		suite.Equal(order.Quantity, replaceRequest.Quantity)
-
-		replaceRequest.RequestOrderID = order.OrderID
+		newRequest.OrderID = order.OrderID
 	})
 	suite.Run("CancelOrder", func() {
-		order, err := suite.Exchange.CancelOrder(replaceRequest.RequestOrderID)
+		suite := suite
+		order, err := suite.exchange.CancelOrder(newRequest.OrderID)
 
 		suite.NoError(err)
 		suite.NotEmpty(order)
+	})
+	suite.Run("FailNewOrder", func() {
+		suite := suite
+		newRequest.Symbol = ""
+		_, err := suite.exchange.NewOrder(newRequest)
+
+		suite.Error(err)
+		suite.NotEmpty(err.Error())
+	})
+	suite.Run("FailCancelOrder", func() {
+		suite := suite
+		_, err := suite.exchange.CancelOrder("")
+
+		suite.Error(err)
+		suite.NotEmpty(err.Error())
 	})
 }

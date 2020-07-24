@@ -1,16 +1,18 @@
 package binance_test
 
-import "github.com/ramezanius/crypex/exchange/binance"
+import (
+	"github.com/ramezanius/crypex/exchange/binance"
+)
 
 func (suite *binanceSuite) TestGetSymbols() {
-	symbols, err := suite.Exchange.GetSymbols()
+	symbols, err := suite.exchange.GetSymbols()
 
 	suite.NoError(err)
 	suite.NotEmpty(symbols)
 }
 
 func (suite *binanceSuite) TestGetBalances() {
-	balances, err := suite.Exchange.GetBalances()
+	balances, err := suite.exchange.GetBalances()
 
 	suite.NoError(err)
 	suite.NotEmpty(balances)
@@ -23,12 +25,13 @@ func (suite *binanceSuite) TestOrders() {
 
 		Side:        binance.Buy,
 		Type:        binance.Limit,
-		Symbol:      binance.BNB + binance.USD,
 		TimeInForce: binance.GoodTillCancel,
+		Symbol:      binance.BNB + binance.USD,
 	}
 
 	suite.Run("NewOrder", func() {
-		order, err := suite.Exchange.NewOrder(newRequest)
+		suite := suite
+		order, err := suite.exchange.NewOrder(newRequest)
 
 		suite.NoError(err)
 		suite.NotEmpty(order)
@@ -40,10 +43,25 @@ func (suite *binanceSuite) TestOrders() {
 		newRequest.OrderID = order.OrderID
 	})
 	suite.Run("CancelOrder", func() {
-		order, err := suite.Exchange.CancelOrder(
-			newRequest.OrderID, newRequest.Symbol)
+		suite := suite
+		order, err := suite.exchange.CancelOrder(newRequest.OrderID, newRequest.Symbol)
 
 		suite.NoError(err)
 		suite.NotEmpty(order)
+	})
+	suite.Run("FailNewOrder", func() {
+		suite := suite
+		newRequest.Symbol = ""
+		_, err := suite.exchange.NewOrder(newRequest)
+
+		suite.Error(err)
+		suite.NotEmpty(err.Error())
+	})
+	suite.Run("FailCancelOrder", func() {
+		suite := suite
+		_, err := suite.exchange.CancelOrder("", "")
+
+		suite.Error(err)
+		suite.NotEmpty(err.Error())
 	})
 }

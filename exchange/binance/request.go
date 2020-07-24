@@ -4,46 +4,39 @@ import (
 	"strings"
 
 	"github.com/ramezanius/crypex/exchange"
+	"github.com/ramezanius/crypex/exchange/util"
 )
 
 // SymbolsResponse struct
 type SymbolsResponse struct {
-	Data Symbols `json:"symbols,required"`
+	Symbols Symbols `json:"symbols,required"`
 }
 
-// GetSymbols gets a list of exchange symbols.
+// GetSymbols returns exchange symbols.
 func (b *Binance) GetSymbols() (response *Symbols, err error) {
 	var rawResponse SymbolsResponse
 
 	err = b.Request(exchange.RequestParams{
 		Method: "GET", Endpoint: "/exchangeInfo",
 	}, &rawResponse)
-	if err != nil {
-		return
-	}
-
-	response = &rawResponse.Data
+	response = &rawResponse.Symbols
 
 	return
 }
 
-// BalancesResponse struct
-type BalancesResponse struct {
-	Data Assets `json:"balances,required"`
+// AssetsResponse struct
+type AssetsResponse struct {
+	Assets Assets `json:"balances,required"`
 }
 
-// GetBalances gets user balances on exchange. @authenticate
+// GetBalances returns user assets on exchange.
 func (b *Binance) GetBalances() (response *Assets, err error) {
-	var rawResponse BalancesResponse
+	var rawResponse AssetsResponse
 
 	err = b.Request(exchange.RequestParams{
 		Method: "GET", Endpoint: "/account", Auth: true,
 	}, &rawResponse)
-	if err != nil {
-		return
-	}
-
-	response = &rawResponse.Data
+	response = &rawResponse.Assets
 
 	return
 }
@@ -65,28 +58,26 @@ type NewOrder struct {
 	TimeInForce TimeInForce `json:"timeInForce,omitempty"`
 }
 
-// NewOrder places a new order. @authenticate
-func (b *Binance) NewOrder(params NewOrder) (response *Report, err error) {
+// NewOrder creates a new order.
+func (b *Binance) NewOrder(params NewOrder) (response *OrderResponse, err error) {
 	params.Symbol = strings.ToUpper(params.Symbol)
 
-	var rawResponse OrderResponse
+	if params.OrderID == "" {
+		params.OrderID = util.GenerateUUID()
+	}
+
+	response = &OrderResponse{}
 
 	err = b.Request(exchange.RequestParams{
 		Auth: true, Params: params,
 		Method: "POST", Endpoint: "/order",
-	}, &rawResponse)
-	if err != nil {
-		return
-	}
-
-	report := Report(rawResponse)
-	response = &report
+	}, &response)
 
 	return
 }
 
-// CancelOrder cancels an order. @authenticate
-func (b *Binance) CancelOrder(orderID, symbol string) (response *Report, err error) {
+// CancelOrder cancels an order.
+func (b *Binance) CancelOrder(orderID, symbol string) (response *OrderResponse, err error) {
 	params := struct {
 		Symbol  string `json:"symbol,required"`
 		OrderID string `json:"origClientOrderId,required"`
@@ -95,18 +86,12 @@ func (b *Binance) CancelOrder(orderID, symbol string) (response *Report, err err
 		Symbol:  strings.ToUpper(symbol),
 	}
 
-	var rawResponse OrderResponse
+	response = &OrderResponse{}
 
 	err = b.Request(exchange.RequestParams{
 		Auth: true, Params: params,
 		Method: "DELETE", Endpoint: "/order",
-	}, &rawResponse)
-	if err != nil {
-		return
-	}
-
-	report := Report(rawResponse)
-	response = &report
+	}, &response)
 
 	return
 }

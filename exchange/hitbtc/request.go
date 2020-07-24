@@ -1,50 +1,34 @@
 package hitbtc
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ramezanius/crypex/exchange"
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
-// GetSymbol get a specific of exchange symbols.
-func (h *HitBTC) GetSymbol(symbol string) (response *Symbol, err error) {
-	params := struct {
-		Symbol string `json:"symbol,required"`
-	}{Symbol: symbol}
-
-	err = h.Stream(exchange.StreamParams{
-		Params: params,
-		Method: "getSymbol",
-	}, &response)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-// GetSymbols gets a list of exchange symbols.
+// GetSymbols returns exchange symbols.
 func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
-	err = h.Stream(exchange.StreamParams{
-		Method: "getSymbols",
+	response = &Symbols{}
+
+	err = h.Request(exchange.RequestParams{
+		Method: "GET", Endpoint: "/public/symbol",
 	}, &response)
-	if err != nil {
-		return
-	}
 
 	return
 }
 
-// GetBalances gets user balances on exchange. @authenticate
+// AssetsResponse struct
+type AssetsResponse Assets
+
+// GetBalances returns user assets on exchange.
 func (h *HitBTC) GetBalances() (response *Assets, err error) {
-	err = h.Stream(exchange.StreamParams{
-		Auth:   true,
-		Method: "getTradingBalance",
+	response = &Assets{}
+
+	err = h.Request(exchange.RequestParams{
+		Method: "GET", Endpoint: "/trading/balance", Auth: true,
 	}, &response)
-	if err != nil {
-		return
-	}
 
 	return
 }
@@ -59,74 +43,41 @@ type NewOrder struct {
 	Quantity float64 `json:"quantity,string"`
 	OrderID  string  `json:"clientOrderId,required"`
 
-	StopPrice  float64   `json:"stopPrice,required"`
-	ExpireTime time.Time `json:"expireTime,required"`
+	StopPrice  float64    `json:"stopPrice,omitempty"`
+	ExpireTime *time.Time `json:"expireTime,omitempty"`
 
-	PostOnly       bool   `json:"postOnly,required"`
-	TimeInForce    string `json:"timeInForce,required"`
-	StrictValidate bool   `json:"strictValidate,required"`
+	PostOnly       bool   `json:"postOnly,omitempty"`
+	TimeInForce    string `json:"timeInForce,omitempty"`
+	StrictValidate bool   `json:"strictValidate,omitempty"`
 }
 
-// NewOrder places a new order. @authenticate
-func (h *HitBTC) NewOrder(params NewOrder) (response *Report, err error) {
+// NewOrder creates a new order.
+func (h *HitBTC) NewOrder(params NewOrder) (response *ReportsResponse, err error) {
 	if params.OrderID == "" {
 		params.OrderID = util.GenerateUUID()
 	}
 
-	err = h.Stream(exchange.StreamParams{
-		Auth:   true,
-		Params: params,
-		Method: "newOrder",
+	response = &ReportsResponse{}
+
+	err = h.Request(exchange.RequestParams{
+		Auth:     true,
+		Params:   params,
+		Method:   "PUT",
+		Endpoint: fmt.Sprintf("/order/%s", params.OrderID),
 	}, &response)
-	if err != nil {
-		return
-	}
 
 	return
 }
 
-// CancelOrder cancels an order. @authenticate
-func (h *HitBTC) CancelOrder(orderID string) (response *Report, err error) {
-	params := struct {
-		OrderID string `json:"clientOrderId,required"`
-	}{OrderID: orderID}
+// CancelOrder cancels an order.
+func (h *HitBTC) CancelOrder(orderID string) (response *ReportsResponse, err error) {
+	response = &ReportsResponse{}
 
-	err = h.Stream(exchange.StreamParams{
-		Auth:   true,
-		Params: params,
-		Method: "cancelOrder",
+	err = h.Request(exchange.RequestParams{
+		Auth:     true,
+		Method:   "DELETE",
+		Endpoint: fmt.Sprintf("/order/%s", orderID),
 	}, &response)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-// ReplaceOrder struct
-type ReplaceOrder struct {
-	Price    float64 `json:"price,string"`
-	Quantity float64 `json:"quantity,string"`
-
-	OrderID        string `json:"clientOrderId,required"`
-	RequestOrderID string `json:"requestClientId,required"`
-	StrictValidate bool   `json:"strictValidate,required"`
-}
-
-// ReplaceOrder replaces a new order. @authenticate
-func (h *HitBTC) ReplaceOrder(params ReplaceOrder) (response *Report, err error) {
-	if params.RequestOrderID == "" {
-		params.RequestOrderID = util.GenerateUUID()
-	}
-
-	err = h.Stream(exchange.StreamParams{
-		Auth:   true,
-		Params: params,
-		Method: "cancelReplaceOrder",
-	}, &response)
-	if err != nil {
-		return
-	}
 
 	return
 }
