@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/ramezanius/crypex/exchange"
-	"github.com/ramezanius/crypex/exchange/binance"
 )
 
 const (
@@ -65,10 +64,6 @@ func (h *HitBTC) Authenticate(conn *websocket.Conn) (err error) {
 
 // Request sends an HTTP request and returns an HTTP response.
 func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) error {
-	if request.Auth && h.PublicKey == "" || h.SecretKey == "" {
-		return binance.ErrKeysNotSet
-	}
-
 	parsedURL, _ := url.ParseRequestURI(apiURL)
 	parsedURL.Path = parsedURL.Path + request.Endpoint
 
@@ -89,7 +84,11 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 	parsedURL.RawQuery = q.Encode()
 	req, _ := http.NewRequest(request.Method, parsedURL.String(), nil)
 
-	if request.Auth && h.PublicKey != "" && h.SecretKey != "" {
+	if request.Auth {
+		if h.PublicKey == "" || h.SecretKey == "" {
+			return ErrKeysNotSet
+		}
+
 		req.SetBasicAuth(h.PublicKey, h.SecretKey)
 	}
 
