@@ -22,15 +22,12 @@ func (b *Binance) read(event *exchange.Event, handler exchange.HandlerFunc) {
 
 	switch event.Method {
 	case "executionReport":
-		redirect(&ReportsResponse{})
+		redirect(&ReportsStream{})
 
 	case "kline":
-		redirect(&CandlesResponse{})
+		redirect(&CandlesStream{})
 	}
 }
-
-// ReportsResponse response
-type ReportsResponse Report
 
 // SubscribeReports subscribes to the reports.
 func (b *Binance) SubscribeReports(handler exchange.HandlerFunc) (err error) {
@@ -48,19 +45,6 @@ func (b *Binance) UnsubscribeReports() (err error) {
 	b.connections[b.ListenKey] = nil
 
 	return
-}
-
-// CandlesParams struct
-type CandlesParams struct {
-	Symbol string
-	Period Period
-}
-
-// CandlesResponse struct
-type CandlesResponse struct {
-	Period Period `json:"-"`
-	Symbol string `json:"s,required"`
-	Candle Candle `json:"k,required"`
 }
 
 // SubscribeCandles subscribes to the candles.

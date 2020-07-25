@@ -11,6 +11,16 @@ func (suite *binanceSuite) TestGetSymbols() {
 	suite.NotEmpty(symbols)
 }
 
+func (suite *binanceSuite) TestGetCandles() {
+	candles, err := suite.exchange.GetCandles(binance.CandlesParams{
+		Symbol: binance.ETH + binance.BTC,
+		Period: binance.Period1Hour,
+	})
+
+	suite.NoError(err)
+	suite.NotEmpty(candles)
+}
+
 func (suite *binanceSuite) TestGetBalances() {
 	balances, err := suite.exchange.GetBalances()
 

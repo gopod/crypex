@@ -11,6 +11,16 @@ func (suite *hitbtcSuite) TestGetSymbols() {
 	suite.NotEmpty(symbols)
 }
 
+func (suite *hitbtcSuite) TestGetCandles() {
+	candles, err := suite.exchange.GetCandles(hitbtc.CandlesParams{
+		Symbol: hitbtc.ETH + hitbtc.USD,
+		Period: hitbtc.Period1Hour,
+	})
+
+	suite.NoError(err)
+	suite.NotEmpty(candles)
+}
+
 func (suite *hitbtcSuite) TestGetBalances() {
 	balances, err := suite.exchange.GetBalances()
 

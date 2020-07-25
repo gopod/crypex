@@ -7,11 +7,6 @@ import (
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
-// SymbolsResponse struct
-type SymbolsResponse struct {
-	Symbols Symbols `json:"symbols,required"`
-}
-
 // GetSymbols returns exchange symbols.
 func (b *Binance) GetSymbols() (response *Symbols, err error) {
 	var rawResponse SymbolsResponse
@@ -24,9 +19,19 @@ func (b *Binance) GetSymbols() (response *Symbols, err error) {
 	return
 }
 
-// AssetsResponse struct
-type AssetsResponse struct {
-	Assets Assets `json:"balances,required"`
+// GetCandles returns symbol candles.
+func (b *Binance) GetCandles(params CandlesParams) (response *Candles, err error) {
+	params.Symbol = strings.ToUpper(params.Symbol)
+
+	response = &Candles{}
+
+	err = b.Request(exchange.RequestParams{
+		Method:   "GET",
+		Params:   params,
+		Endpoint: "/klines",
+	}, &response)
+
+	return
 }
 
 // GetBalances returns user assets on exchange.
@@ -39,23 +44,6 @@ func (b *Binance) GetBalances() (response *Assets, err error) {
 	response = &rawResponse.Assets
 
 	return
-}
-
-// OrderResponse struct
-type OrderResponse Order
-
-// NewOrder struct
-type NewOrder struct {
-	Side  Side    `json:"side,required"`
-	Type  Type    `json:"type,required"`
-	Price float64 `json:"price,string"`
-
-	Symbol   string  `json:"symbol,required"`
-	Quantity float64 `json:"quantity,string"`
-	OrderID  string  `json:"newClientOrderId,omitempty"`
-
-	StopPrice   float64     `json:"stopPrice,omitempty"`
-	TimeInForce TimeInForce `json:"timeInForce,omitempty"`
 }
 
 // NewOrder creates a new order.

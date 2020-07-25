@@ -2,7 +2,6 @@ package hitbtc
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/ramezanius/crypex/exchange"
 	"github.com/ramezanius/crypex/exchange/util"
@@ -19,8 +18,18 @@ func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
 	return
 }
 
-// AssetsResponse struct
-type AssetsResponse Assets
+// GetCandles returns symbol candles.
+func (h *HitBTC) GetCandles(params CandlesParams) (response *Candles, err error) {
+	response = &Candles{}
+
+	err = h.Request(exchange.RequestParams{
+		Method:   "GET",
+		Params:   params,
+		Endpoint: fmt.Sprintf("/public/candles/%s", params.Symbol),
+	}, &response)
+
+	return
+}
 
 // GetBalances returns user assets on exchange.
 func (h *HitBTC) GetBalances() (response *Assets, err error) {
@@ -33,31 +42,13 @@ func (h *HitBTC) GetBalances() (response *Assets, err error) {
 	return
 }
 
-// NewOrder struct
-type NewOrder struct {
-	Side  Side    `json:"side,required"`
-	Type  Type    `json:"type,required"`
-	Price float64 `json:"price,string"`
-
-	Symbol   string  `json:"symbol,required"`
-	Quantity float64 `json:"quantity,string"`
-	OrderID  string  `json:"clientOrderId,required"`
-
-	StopPrice  float64    `json:"stopPrice,omitempty"`
-	ExpireTime *time.Time `json:"expireTime,omitempty"`
-
-	PostOnly       bool   `json:"postOnly,omitempty"`
-	TimeInForce    string `json:"timeInForce,omitempty"`
-	StrictValidate bool   `json:"strictValidate,omitempty"`
-}
-
 // NewOrder creates a new order.
-func (h *HitBTC) NewOrder(params NewOrder) (response *ReportsResponse, err error) {
+func (h *HitBTC) NewOrder(params NewOrder) (response *ReportsStream, err error) {
 	if params.OrderID == "" {
 		params.OrderID = util.GenerateUUID()
 	}
 
-	response = &ReportsResponse{}
+	response = &ReportsStream{}
 
 	err = h.Request(exchange.RequestParams{
 		Auth:     true,
@@ -70,8 +61,8 @@ func (h *HitBTC) NewOrder(params NewOrder) (response *ReportsResponse, err error
 }
 
 // CancelOrder cancels an order.
-func (h *HitBTC) CancelOrder(orderID string) (response *ReportsResponse, err error) {
-	response = &ReportsResponse{}
+func (h *HitBTC) CancelOrder(orderID string) (response *ReportsStream, err error) {
+	response = &ReportsStream{}
 
 	err = h.Request(exchange.RequestParams{
 		Auth:     true,

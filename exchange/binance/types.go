@@ -89,6 +89,11 @@ type Symbol struct {
 // Symbols struct
 type Symbols []Symbol
 
+// SymbolsResponse struct
+type SymbolsResponse struct {
+	Symbols Symbols `json:"symbols,required"`
+}
+
 // Asset struct
 type Asset struct {
 	Currency string `json:"asset,required"`
@@ -99,6 +104,11 @@ type Asset struct {
 
 // Assets struct
 type Assets []Asset
+
+// AssetsResponse struct
+type AssetsResponse struct {
+	Assets Assets `json:"balances,required"`
+}
 
 // Report struct
 type Report struct {
@@ -117,7 +127,10 @@ type Report struct {
 	OriginalOrderID string      `json:"C,omitempty"`
 }
 
-func (r *ReportsResponse) UnmarshalJSON(data []byte) error {
+// ReportsStream response
+type ReportsStream Report
+
+func (r *ReportsStream) UnmarshalJSON(data []byte) error {
 	var v struct {
 		ID              int64       `json:"i,required"`
 		Side            Side        `json:"S,required"`
@@ -179,6 +192,9 @@ type Order struct {
 	OriginalOrderID string      `json:"origClientOrderId,omitempty"`
 }
 
+// OrderResponse struct
+type OrderResponse Order
+
 func (r *OrderResponse) UnmarshalJSON(data []byte) error {
 	var v struct {
 		ID              int64       `json:"orderId,required"`
@@ -219,6 +235,20 @@ func (r *OrderResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// NewOrder struct
+type NewOrder struct {
+	Side  Side    `json:"side,required"`
+	Type  Type    `json:"type,required"`
+	Price float64 `json:"price,string"`
+
+	Symbol   string  `json:"symbol,required"`
+	Quantity float64 `json:"quantity,string"`
+	OrderID  string  `json:"newClientOrderId,omitempty"`
+
+	StopPrice   float64     `json:"stopPrice,omitempty"`
+	TimeInForce TimeInForce `json:"timeInForce,omitempty"`
+}
+
 // Candle struct
 type Candle struct {
 	StartAt     *time.Time `json:"t,required"`
@@ -235,7 +265,36 @@ type Candle struct {
 // Candles struct
 type Candles []Candle
 
-func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
+func (r *Candle) UnmarshalJSON(data []byte) error {
+	var v []interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	r.Min = cast.ToFloat64(v[3])
+	r.Max = cast.ToFloat64(v[2])
+	r.Open = cast.ToFloat64(v[1])
+	r.Close = cast.ToFloat64(v[4])
+	r.Volume = cast.ToFloat64(v[5])
+	r.QuoteVolume = cast.ToFloat64(v[7])
+
+	endAt := time.Unix(cast.ToInt64(strconv.Itoa(int(v[6].(float64)))[:10]), 0)
+	startAt := time.Unix(cast.ToInt64(strconv.Itoa(int(v[0].(float64)))[:10]), 0)
+
+	r.EndAt = &endAt
+	r.StartAt = &startAt
+
+	return nil
+}
+
+// CandlesStream struct
+type CandlesStream struct {
+	Period Period `json:"-"`
+	Symbol string `json:"s,required"`
+	Candle Candle `json:"k,required"`
+}
+
+func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 	var v struct {
 		Symbol string `json:"s,required"`
 		Candle struct {
@@ -274,4 +333,10 @@ func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
 	r.Candle.StartAt = &startAt
 
 	return nil
+}
+
+// CandlesParams struct
+type CandlesParams struct {
+	Symbol string `json:"symbol"`
+	Period Period `json:"interval"`
 }

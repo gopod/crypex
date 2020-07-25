@@ -20,15 +20,12 @@ func (h *HitBTC) read(event *exchange.Event, handler exchange.HandlerFunc) {
 
 	switch event.Method {
 	case "report":
-		redirect(&ReportsResponse{})
+		redirect(&ReportsStream{})
 
 	case "updateCandles":
-		redirect(&CandlesResponse{})
+		redirect(&CandlesStream{})
 	}
 }
-
-// ReportsResponse struct
-type ReportsResponse Report
 
 // SubscribeReports subscribes to the reports.
 func (h *HitBTC) SubscribeReports(handler exchange.HandlerFunc) (err error) {
@@ -50,19 +47,6 @@ func (h *HitBTC) UnsubscribeReports() (err error) {
 	h.connections[h.SecretKey] = nil
 
 	return
-}
-
-// CandlesResponse struct
-type CandlesResponse struct {
-	Candle Candle `json:"data,required"`
-	Symbol string `json:"symbol,required"`
-	Period string `json:"period,required"`
-}
-
-// CandlesResponse struct
-type CandlesParams struct {
-	Period Period `json:"period,omitempty"`
-	Symbol string `json:"symbol,required"`
 }
 
 // SubscribeCandles subscribes to the candles.

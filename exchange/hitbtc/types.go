@@ -81,6 +81,9 @@ type Asset struct {
 // Assets struct
 type Assets []Asset
 
+// AssetsResponse struct
+type AssetsResponse Assets
+
 // Report struct
 type Report struct {
 	ID    int64   `json:"id,int,string"`
@@ -101,7 +104,10 @@ type Report struct {
 	OriginalOrderID string `json:"originalRequestClientOrderId,omitempty"`
 }
 
-func (r *ReportsResponse) UnmarshalJSON(data []byte) error {
+// ReportsStream struct
+type ReportsStream Report
+
+func (r *ReportsStream) UnmarshalJSON(data []byte) error {
 	var v struct {
 		ID    interface{} `json:"id,required"`
 		Side  Side        `json:"side,required"`
@@ -142,6 +148,24 @@ func (r *ReportsResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// NewOrder struct
+type NewOrder struct {
+	Side  Side    `json:"side,required"`
+	Type  Type    `json:"type,required"`
+	Price float64 `json:"price,string"`
+
+	Symbol   string  `json:"symbol,required"`
+	Quantity float64 `json:"quantity,string"`
+	OrderID  string  `json:"clientOrderId,required"`
+
+	StopPrice  float64    `json:"stopPrice,omitempty"`
+	ExpireTime *time.Time `json:"expireTime,omitempty"`
+
+	PostOnly       bool   `json:"postOnly,omitempty"`
+	TimeInForce    string `json:"timeInForce,omitempty"`
+	StrictValidate bool   `json:"strictValidate,omitempty"`
+}
+
 // Candle struct
 type Candle struct {
 	Min   float64 `json:"min,string"`
@@ -157,7 +181,14 @@ type Candle struct {
 // Candles struct
 type Candles []Candle
 
-func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
+// CandlesStream struct
+type CandlesStream struct {
+	Candle Candle `json:"data,required"`
+	Symbol string `json:"symbol,required"`
+	Period string `json:"period,required"`
+}
+
+func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 	var v struct {
 		Candles Candles `json:"data,required"`
 		Symbol  string  `json:"symbol,required"`
@@ -176,4 +207,10 @@ func (r *CandlesResponse) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
+}
+
+// CandlesParams struct
+type CandlesParams struct {
+	Period Period `json:"period"`
+	Symbol string `json:"symbol"`
 }
