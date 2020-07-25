@@ -159,13 +159,13 @@ func (b *Binance) Stream(request exchange.StreamParams, handler exchange.Handler
 		request.Endpoint = b.ListenKey
 	}
 
+	if request.Location == "" {
+		request.Location = request.Endpoint
+	}
+
 	conn, err := exchange.NewConn(streamURL, request.Endpoint, b.read, handler)
 	if err != nil {
 		return err
-	}
-
-	if request.Location == "" {
-		request.Location = request.Endpoint
 	}
 
 	b.Lock()
