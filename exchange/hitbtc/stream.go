@@ -2,9 +2,7 @@ package hitbtc
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-	"strings"
 
 	"github.com/ramezanius/crypex/exchange"
 )
@@ -36,7 +34,7 @@ type ReportsResponse Report
 func (h *HitBTC) SubscribeReports(handler exchange.HandlerFunc) (err error) {
 	err = h.Stream(exchange.StreamParams{
 		Auth:     true,
-		Location: h.SecretKey,
+		Location: "/trading",
 		Method:   "subscribeReports",
 	}, handler)
 
@@ -70,8 +68,8 @@ type CandlesParams struct {
 // SubscribeCandles subscribes to the candles.
 func (h *HitBTC) SubscribeCandles(params CandlesParams, handler exchange.HandlerFunc) (err error) {
 	err = h.Stream(exchange.StreamParams{
-		Location: fmt.Sprintf("%s@candle_%s", strings.ToLower(params.Symbol), params.Period),
 		Method:   "subscribeCandles",
+		Location: "/public",
 		Params:   params,
 	}, handler)
 
@@ -80,13 +78,11 @@ func (h *HitBTC) SubscribeCandles(params CandlesParams, handler exchange.Handler
 
 // UnsubscribeCandles unsubscribes from candles.
 func (h *HitBTC) UnsubscribeCandles(params CandlesParams) (err error) {
-	location := fmt.Sprintf("%s@candle_%s", strings.ToLower(params.Symbol), params.Period)
+	err = h.Stream(exchange.StreamParams{
+		Method:   "unsubscribeCandles",
+		Location: "/public",
+		Params:   params,
+	}, func(interface{}) {})
 
-	h.Lock()
-	defer h.Unlock()
-
-	err = exchange.CloseConn(h.connections[location])
-	h.connections[location] = nil
-
-	return err
+	return
 }

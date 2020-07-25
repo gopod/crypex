@@ -54,10 +54,11 @@ func (h *HitBTC) Authenticate(conn *websocket.Conn) (err error) {
 		Algorithm: "BASIC",
 	}
 
-	err = conn.WriteJSON(exchange.StreamParams{
-		Method: "login",
-		Params: params,
-	})
+	err = conn.WriteJSON(
+		exchange.StreamParams{
+			Method: "login",
+			Params: params,
+		})
 
 	return
 }
@@ -119,9 +120,27 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 // Stream returns a new connection and writes a request
 // to the connection if there's a method.
 func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
-	conn, err := exchange.NewConn(streamURL, request.Endpoint, h.read, handler)
-	if err != nil {
-		return err
+	h.Lock()
+	defer h.Unlock()
+
+	if request.Location == "" {
+		request.Location = request.Endpoint
+	}
+
+	var (
+		err  error
+		conn *websocket.Conn
+	)
+
+	if _, ok := h.connections[request.Location]; !ok {
+		conn, err = exchange.NewConn(streamURL, request.Endpoint, h.read, handler)
+		if err != nil {
+			return err
+		}
+
+		h.connections[request.Location] = conn
+	} else {
+		conn = h.connections[request.Location]
 	}
 
 	if request.Auth {
@@ -137,14 +156,6 @@ func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerF
 			return err
 		}
 	}
-
-	if request.Location == "" {
-		request.Location = request.Endpoint
-	}
-
-	h.Lock()
-	h.connections[request.Location] = conn
-	h.Unlock()
 
 	return nil
 }
