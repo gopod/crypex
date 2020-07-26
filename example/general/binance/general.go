@@ -18,6 +18,7 @@ func main() {
 	ToUSD()
 
 	GetSymbols()
+	GetCandles()
 	GetBalances()
 
 	NewOrder()
@@ -41,6 +42,20 @@ func GetSymbols() {
 	}
 
 	log.Println(symbols)
+}
+
+func GetCandles() {
+	candles, err := Binance.GetCandles(
+		binance.CandlesParams{
+			Symbol: binance.XRP + binance.BTC,
+			Period: binance.Period1Day,
+			Limit:  10,
+		})
+	if err != nil {
+		log.Panic(err)
+	}
+
+	log.Println(candles)
 }
 
 func GetBalances() {

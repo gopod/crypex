@@ -18,6 +18,7 @@ func main() {
 	ToUSD()
 
 	GetSymbols()
+	GetCandles()
 	GetBalances()
 
 	NewOrder()
@@ -41,6 +42,20 @@ func GetSymbols() {
 	}
 
 	log.Println(symbols)
+}
+
+func GetCandles() {
+	candles, err := HitBTC.GetCandles(
+		hitbtc.CandlesParams{
+			Symbol: hitbtc.XRP + hitbtc.USD,
+			Period: hitbtc.Period1Day,
+			Limit:  500,
+		})
+	if err != nil {
+		log.Panic(err)
+	}
+
+	log.Println(candles)
 }
 
 func GetBalances() {
