@@ -337,6 +337,7 @@ func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 
 // CandlesParams struct
 type CandlesParams struct {
+	Limit  int    `json:"limit"`
 	Symbol string `json:"symbol"`
 	Period Period `json:"interval"`
 }

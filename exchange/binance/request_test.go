@@ -15,6 +15,7 @@ func (suite *binanceSuite) TestGetCandles() {
 	candles, err := suite.exchange.GetCandles(binance.CandlesParams{
 		Symbol: binance.ETH + binance.BTC,
 		Period: binance.Period1Hour,
+		Limit:  1000,
 	})
 
 	suite.NoError(err)

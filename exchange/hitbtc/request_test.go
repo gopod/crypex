@@ -15,6 +15,7 @@ func (suite *hitbtcSuite) TestGetCandles() {
 	candles, err := suite.exchange.GetCandles(hitbtc.CandlesParams{
 		Symbol: hitbtc.ETH + hitbtc.USD,
 		Period: hitbtc.Period1Hour,
+		Limit:  1000,
 	})
 
 	suite.NoError(err)
