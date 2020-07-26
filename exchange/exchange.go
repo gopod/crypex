@@ -11,7 +11,7 @@ import (
 // Event struct
 type Event struct {
 	Method string
-	Params []byte
+	Params interface{}
 }
 
 type (
