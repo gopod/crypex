@@ -10,7 +10,7 @@ import (
 // read redirects response to handler.
 func (h *HitBTC) read(event *exchange.Event, handler exchange.HandlerFunc) {
 	var redirect = func(response interface{}) {
-		err := json.Unmarshal(event.Params, &response)
+		err := json.Unmarshal(event.Params.([]byte), &response)
 		if err != nil {
 			log.Fatalf("unmarshal response: [hitbtc]: %v", err)
 		}
@@ -23,6 +23,9 @@ func (h *HitBTC) read(event *exchange.Event, handler exchange.HandlerFunc) {
 		redirect(&ReportsStream{})
 
 	case "updateCandles":
+		redirect(&CandlesStream{})
+
+	case "snapshotCandles":
 		redirect(&CandlesStream{})
 	}
 }

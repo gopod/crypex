@@ -186,30 +186,9 @@ type Candles []Candle
 
 // CandlesStream struct
 type CandlesStream struct {
-	Candle Candle `json:"data,required"`
-	Symbol string `json:"symbol,required"`
-	Period string `json:"period,required"`
-}
-
-func (r *CandlesStream) UnmarshalJSON(data []byte) error {
-	var v struct {
-		Candles Candles `json:"data,required"`
-		Symbol  string  `json:"symbol,required"`
-		Period  string  `json:"period,required"`
-	}
-
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
-	}
-
-	r.Symbol = v.Symbol
-	r.Period = v.Period
-
-	if len(v.Candles) != 0 {
-		r.Candle = v.Candles[0]
-	}
-
-	return nil
+	Candles Candles `json:"data,required"`
+	Symbol  string  `json:"symbol,required"`
+	Period  string  `json:"period,required"`
 }
 
 // CandlesParams struct

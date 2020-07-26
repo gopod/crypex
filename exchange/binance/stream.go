@@ -12,7 +12,7 @@ import (
 // read redirects response to handler.
 func (b *Binance) read(event *exchange.Event, handler exchange.HandlerFunc) {
 	var redirect = func(response interface{}) {
-		err := json.Unmarshal(event.Params, &response)
+		err := json.Unmarshal(event.Params.([]byte), &response)
 		if err != nil {
 			log.Fatalf("unmarshal response: [binance]: %v", err)
 		}
@@ -23,6 +23,9 @@ func (b *Binance) read(event *exchange.Event, handler exchange.HandlerFunc) {
 	switch event.Method {
 	case "executionReport":
 		redirect(&ReportsStream{})
+
+	case "klines":
+		go handler(event.Params.(*CandlesStream))
 
 	case "kline":
 		redirect(&CandlesStream{})
@@ -49,6 +52,20 @@ func (b *Binance) UnsubscribeReports() (err error) {
 
 // SubscribeCandles subscribes to the candles.
 func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.HandlerFunc) (err error) {
+	snapshot, err := b.GetCandles(params)
+	if err != nil {
+		return
+	}
+
+	b.read(&exchange.Event{
+		Method: "klines",
+		Params: &CandlesStream{
+			Period:  params.Period,
+			Symbol:  strings.ToUpper(params.Symbol),
+			Candles: *snapshot,
+		},
+	}, handler)
+
 	err = b.Stream(exchange.StreamParams{
 		Endpoint: fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period),
 	}, handler)
