@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cast"
+	"go.uber.org/ratelimit"
 )
 
 const (
@@ -46,6 +47,8 @@ type HitBTC struct {
 
 	// Websocket connections
 	connections map[string]*websocket.Conn
+	// Public, Trading rate limits
+	publicLimit, tradingLimit ratelimit.Limiter
 
 	// Public API key, Secret API key
 	PublicKey, SecretKey string

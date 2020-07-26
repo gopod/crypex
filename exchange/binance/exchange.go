@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"go.uber.org/ratelimit"
 
 	"github.com/ramezanius/crypex/exchange"
 	"github.com/ramezanius/crypex/exchange/util"
@@ -24,7 +25,9 @@ const (
 // New returns a new binance.
 func New() *Binance {
 	return &Binance{
-		connections: make(map[string]*websocket.Conn),
+		publicLimit:  ratelimit.New(20),
+		tradingLimit: ratelimit.New(10),
+		connections:  make(map[string]*websocket.Conn),
 	}
 }
 
@@ -83,14 +86,23 @@ func (b *Binance) Authenticate() (err error) {
 
 // Request sends an HTTP request and returns an HTTP response.
 func (b *Binance) Request(request exchange.RequestParams, response interface{}) error {
+	if request.Auth {
+		b.tradingLimit.Take()
+	} else {
+		b.publicLimit.Take()
+	}
+
 	parsedURL, _ := url.ParseRequestURI(apiURL)
 	parsedURL.Path = parsedURL.Path + request.Endpoint
 
 	// Parse params to query string
-	bin, _ := json.Marshal(request.Params)
+	bin, err := json.Marshal(request.Params)
+	if err != nil {
+		return err
+	}
 	m := map[string]interface{}{}
 
-	err := json.Unmarshal(bin, &m)
+	err = json.Unmarshal(bin, &m)
 	if err != nil {
 		return err
 	}
@@ -135,14 +147,20 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 	}()
 
 	if res.StatusCode != 200 {
-		err = &APIError{}
-		_ = json.NewDecoder(res.Body).Decode(&err)
+		e := &APIError{}
+		err := json.NewDecoder(res.Body).Decode(&e)
+		if err != nil {
+			return err
+		}
 
-		return err
+		return e
 	}
 
 	if response != nil {
 		err = json.NewDecoder(res.Body).Decode(&response)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/gorilla/websocket"
+	"go.uber.org/ratelimit"
 
 	"github.com/ramezanius/crypex/exchange"
 )
@@ -19,7 +20,9 @@ const (
 // New returns a new hitbtc.
 func New() *HitBTC {
 	return &HitBTC{
-		connections: make(map[string]*websocket.Conn),
+		publicLimit:  ratelimit.New(100),
+		tradingLimit: ratelimit.New(10),
+		connections:  make(map[string]*websocket.Conn),
 	}
 }
 
@@ -65,14 +68,24 @@ func (h *HitBTC) Authenticate(conn *websocket.Conn) (err error) {
 
 // Request sends an HTTP request and returns an HTTP response.
 func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) error {
+	if request.Auth {
+		h.tradingLimit.Take()
+	} else {
+		h.publicLimit.Take()
+	}
+
 	parsedURL, _ := url.ParseRequestURI(apiURL)
 	parsedURL.Path = parsedURL.Path + request.Endpoint
 
 	// Parse params to query string
-	bin, _ := json.Marshal(request.Params)
+	bin, err := json.Marshal(request.Params)
+	if err != nil {
+		return err
+	}
+
 	m := map[string]interface{}{}
 
-	err := json.Unmarshal(bin, &m)
+	err = json.Unmarshal(bin, &m)
 	if err != nil {
 		return err
 	}
@@ -83,7 +96,10 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 	}
 
 	parsedURL.RawQuery = q.Encode()
-	req, _ := http.NewRequest(request.Method, parsedURL.String(), nil)
+	req, err := http.NewRequest(request.Method, parsedURL.String(), nil)
+	if err != nil {
+		return err
+	}
 
 	if request.Auth {
 		if h.PublicKey == "" || h.SecretKey == "" {
@@ -95,6 +111,9 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 
 	req.Header.Add("Content-type", "application/x-www-form-urlencoded")
 	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
 
 	defer func() {
 		err = res.Body.Close()
@@ -105,13 +124,19 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 
 	if res.StatusCode != 200 {
 		e := &APIError{}
-		_ = json.NewDecoder(res.Body).Decode(&e)
+		err := json.NewDecoder(res.Body).Decode(&e)
+		if err != nil {
+			return err
+		}
 
 		return e
 	}
 
 	if response != nil {
 		err = json.NewDecoder(res.Body).Decode(&response)
+		if err != nil {
+			return err
+		}
 	}
 
 	return err
