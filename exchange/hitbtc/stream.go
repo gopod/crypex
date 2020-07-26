@@ -3,6 +3,7 @@ package hitbtc
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/ramezanius/crypex/exchange"
 )
@@ -22,10 +23,10 @@ func (h *HitBTC) read(event *exchange.Event, handler exchange.HandlerFunc) {
 	case "report":
 		redirect(&ReportsStream{})
 
-	case "updateCandles":
-		redirect(&CandlesStream{})
+	case "candles":
+		go handler(event.Params.(*CandlesStream))
 
-	case "snapshotCandles":
+	case "updateCandles":
 		redirect(&CandlesStream{})
 	}
 }
@@ -54,6 +55,20 @@ func (h *HitBTC) UnsubscribeReports() (err error) {
 
 // SubscribeCandles subscribes to the candles.
 func (h *HitBTC) SubscribeCandles(params CandlesParams, handler exchange.HandlerFunc) (err error) {
+	snapshot, err := h.GetCandles(params)
+	if err != nil {
+		return
+	}
+
+	h.read(&exchange.Event{
+		Method: "candles",
+		Params: &CandlesStream{
+			Period:  params.Period,
+			Symbol:  strings.ToUpper(params.Symbol),
+			Candles: *snapshot,
+		},
+	}, handler)
+
 	err = h.Stream(exchange.StreamParams{
 		Method:   "subscribeCandles",
 		Location: "/public",

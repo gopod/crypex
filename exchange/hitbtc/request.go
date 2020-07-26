@@ -20,6 +20,10 @@ func (h *HitBTC) GetSymbols() (response *Symbols, err error) {
 
 // GetCandles returns symbol candles.
 func (h *HitBTC) GetCandles(params CandlesParams) (response *Candles, err error) {
+	if params.Sort == "" {
+		params.Sort = "DESC"
+	}
+
 	response = &Candles{}
 
 	err = h.Request(exchange.RequestParams{

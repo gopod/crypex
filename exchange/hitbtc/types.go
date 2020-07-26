@@ -188,11 +188,12 @@ type Candles []Candle
 type CandlesStream struct {
 	Candles Candles `json:"data,required"`
 	Symbol  string  `json:"symbol,required"`
-	Period  string  `json:"period,required"`
+	Period  Period  `json:"period,required"`
 }
 
 // CandlesParams struct
 type CandlesParams struct {
+	Sort   string `json:"sort"`
 	Limit  int    `json:"limit,omitempty"`
 	Period Period `json:"period"`
 	Symbol string `json:"symbol"`
