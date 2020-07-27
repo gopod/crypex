@@ -89,7 +89,7 @@ type AssetsResponse Assets
 
 // Report struct
 type Report struct {
-	ID    int64   `json:"id,int,string"`
+	ID    int64   `json:"id,string"`
 	Side  Side    `json:"side,required"`
 	Type  Type    `json:"type,required"`
 	Price float64 `json:"price,string"`
