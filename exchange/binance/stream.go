@@ -52,19 +52,25 @@ func (b *Binance) UnsubscribeReports() (err error) {
 
 // SubscribeCandles subscribes to the candles.
 func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.HandlerFunc) (err error) {
-	snapshot, err := b.GetCandles(params)
-	if err != nil {
-		return
+	if params.Limit <= 0 {
+		params.Limit = 100
 	}
 
-	b.read(&exchange.Event{
-		Method: "klines",
-		Params: &CandlesStream{
-			Period:  params.Period,
-			Symbol:  strings.ToUpper(params.Symbol),
-			Candles: *snapshot,
-		},
-	}, handler)
+	if params.Snapshot {
+		snapshot, err := b.GetCandles(params)
+		if err != nil {
+			return err
+		}
+
+		b.read(&exchange.Event{
+			Method: "klines",
+			Params: &CandlesStream{
+				Period:  params.Period,
+				Symbol:  strings.ToUpper(params.Symbol),
+				Candles: *snapshot,
+			},
+		}, handler)
+	}
 
 	err = b.Stream(exchange.StreamParams{
 		Endpoint: fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period),

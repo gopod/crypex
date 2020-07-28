@@ -24,11 +24,12 @@ func (suite *hitbtcSuite) TestSubscribeReports() {
 
 func (suite *hitbtcSuite) TestSubscribeCandles() {
 	wg := sync.WaitGroup{}
-	wg.Add(3)
+	wg.Add(4)
 
 	params := hitbtc.CandlesParams{
-		Period: hitbtc.Period1Minute,
-		Symbol: hitbtc.BTC + hitbtc.USD,
+		Snapshot: true,
+		Period:   hitbtc.Period1Minute,
+		Symbol:   hitbtc.BTC + hitbtc.USD,
 	}
 
 	suite.NoError(

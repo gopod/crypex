@@ -55,19 +55,25 @@ func (h *HitBTC) UnsubscribeReports() (err error) {
 
 // SubscribeCandles subscribes to the candles.
 func (h *HitBTC) SubscribeCandles(params CandlesParams, handler exchange.HandlerFunc) (err error) {
-	snapshot, err := h.GetCandles(params)
-	if err != nil {
-		return
+	if params.Limit <= 0 {
+		params.Limit = 100
 	}
 
-	h.read(&exchange.Event{
-		Method: "candles",
-		Params: &CandlesStream{
-			Period:  params.Period,
-			Symbol:  strings.ToUpper(params.Symbol),
-			Candles: *snapshot,
-		},
-	}, handler)
+	if params.Snapshot {
+		snapshot, err := h.GetCandles(params)
+		if err != nil {
+			return err
+		}
+
+		h.read(&exchange.Event{
+			Method: "candles",
+			Params: &CandlesStream{
+				Period:  params.Period,
+				Symbol:  strings.ToUpper(params.Symbol),
+				Candles: *snapshot,
+			},
+		}, handler)
+	}
 
 	err = h.Stream(exchange.StreamParams{
 		Method:   "subscribeCandles",

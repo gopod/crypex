@@ -254,16 +254,26 @@ type NewOrder struct {
 
 // Candle struct
 type Candle struct {
-	StartAt     *time.Time `json:"t,required"`
-	EndAt       *time.Time `json:"T,required"`
-	Max         float64    `json:"h,string"`
-	Min         float64    `json:"l,string"`
-	Open        float64    `json:"o,string"`
-	Close       float64    `json:"c,string"`
-	Closed      bool       `json:"x,required"`
-	Volume      float64    `json:"v,string"`
-	QuoteVolume float64    `json:"q,string"`
+	Min   float64 `json:"min,required"`
+	Max   float64 `json:"max,required"`
+	Open  float64 `json:"open,required"`
+	Close float64 `json:"close,required"`
+
+	Volume      float64    `json:"volume,required"`
+	Timestamp   *time.Time `json:"timestamp,required"`
+	VolumeQuote float64    `json:"volumeQuote,required"`
 }
+
+//type Candle struct {
+//	Timestamp   *time.Time `json:"timestamp,required"`
+//	Max         float64    `json:"h,string"`
+//	Min         float64    `json:"l,string"`
+//	Open        float64    `json:"o,string"`
+//	Close       float64    `json:"c,string"`
+//	Closed      bool       `json:"x,required"`
+//	Volume      float64    `json:"v,string"`
+//	QuoteVolume float64    `json:"q,string"`
+//}
 
 // Candles struct
 type Candles []Candle
@@ -279,13 +289,9 @@ func (r *Candle) UnmarshalJSON(data []byte) error {
 	r.Open = cast.ToFloat64(v[1])
 	r.Close = cast.ToFloat64(v[4])
 	r.Volume = cast.ToFloat64(v[5])
-	r.QuoteVolume = cast.ToFloat64(v[7])
 
-	endAt := time.Unix(cast.ToInt64(strconv.Itoa(int(v[6].(float64)))[:10]), 0)
-	startAt := time.Unix(cast.ToInt64(strconv.Itoa(int(v[0].(float64)))[:10]), 0)
-
-	r.EndAt = &endAt
-	r.StartAt = &startAt
+	timestamp := time.Unix(cast.ToInt64(strconv.Itoa(int(v[6].(float64)))[:10]), 0)
+	r.Timestamp = &timestamp
 
 	return nil
 }
@@ -311,7 +317,7 @@ func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 			Symbol      string      `json:"s,required"`
 			Period      string      `json:"i,required"`
 			Volume      interface{} `json:"v,required"`
-			QuoteVolume interface{} `json:"q,required"`
+			VolumeQuote interface{} `json:"q,required"`
 		} `json:"k,required"`
 	}
 	if err := json.Unmarshal(data, &v); err != nil {
@@ -321,18 +327,15 @@ func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 	r.Symbol = v.Symbol
 	r.Period = Period(v.Candle.Period)
 
-	endAt := time.Unix(cast.ToInt64(strconv.Itoa(v.Candle.EndAt)[:10]), 0)
-	startAt := time.Unix(cast.ToInt64(strconv.Itoa(v.Candle.StartAt)[:10]), 0)
+	timestamp := time.Unix(cast.ToInt64(strconv.Itoa(v.Candle.EndAt)[:10]), 0)
 	candle := Candle{
-		StartAt:     &startAt,
-		EndAt:       &endAt,
+		Timestamp:   &timestamp,
 		Max:         cast.ToFloat64(v.Candle.Max.(string)),
 		Min:         cast.ToFloat64(v.Candle.Min.(string)),
 		Open:        cast.ToFloat64(v.Candle.Open.(string)),
 		Close:       cast.ToFloat64(v.Candle.Close.(string)),
-		Closed:      v.Candle.Closed,
 		Volume:      cast.ToFloat64(v.Candle.Volume.(string)),
-		QuoteVolume: cast.ToFloat64(v.Candle.QuoteVolume.(string)),
+		VolumeQuote: cast.ToFloat64(v.Candle.VolumeQuote.(string)),
 	}
 
 	r.Candles = append(r.Candles, candle)
@@ -342,7 +345,9 @@ func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 
 // CandlesParams struct
 type CandlesParams struct {
-	Limit  int    `json:"limit,omitempty"`
+	Snapshot bool `json:"-"`
+
+	Limit  int    `json:"limit"`
 	Symbol string `json:"symbol"`
 	Period Period `json:"interval"`
 }

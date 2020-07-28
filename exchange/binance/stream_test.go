@@ -24,11 +24,12 @@ func (suite *binanceSuite) TestSubscribeReports() {
 
 func (suite *binanceSuite) TestSubscribeCandles() {
 	wg := sync.WaitGroup{}
-	wg.Add(3)
+	wg.Add(4)
 
 	params := binance.CandlesParams{
-		Period: binance.Period1Minute,
-		Symbol: binance.BNB + binance.BTC,
+		Snapshot: true,
+		Period:   binance.Period1Minute,
+		Symbol:   binance.BNB + binance.BTC,
 	}
 
 	suite.NoError(

@@ -176,9 +176,9 @@ type Candle struct {
 	Open  float64 `json:"open,string"`
 	Close float64 `json:"close,string"`
 
-	Volume      float64   `json:"volume,string"`      // Total trading amount within 24 hours in base currency
-	VolumeQuote float64   `json:"volumeQuote,string"` // Total trading amount within 24 hours in quote currency
-	Timestamp   time.Time `json:"timestamp,required"`
+	Volume      float64    `json:"volume,string"`
+	Timestamp   *time.Time `json:"timestamp,required"`
+	VolumeQuote float64    `json:"volumeQuote,string"`
 }
 
 // Candles struct
@@ -193,8 +193,10 @@ type CandlesStream struct {
 
 // CandlesParams struct
 type CandlesParams struct {
+	Snapshot bool `json:"-"`
+
 	Sort   string `json:"sort"`
-	Limit  int    `json:"limit,omitempty"`
+	Limit  int    `json:"limit"`
 	Period Period `json:"period"`
 	Symbol string `json:"symbol"`
 }
