@@ -254,26 +254,14 @@ type NewOrder struct {
 
 // Candle struct
 type Candle struct {
-	Min   float64 `json:"min,required"`
-	Max   float64 `json:"max,required"`
-	Open  float64 `json:"open,required"`
-	Close float64 `json:"close,required"`
-
-	Volume      float64    `json:"volume,required"`
-	Timestamp   *time.Time `json:"timestamp,required"`
-	VolumeQuote float64    `json:"volumeQuote,required"`
+	Timestamp   *time.Time `json:"T,required"`
+	Max         float64    `json:"h,string"`
+	Min         float64    `json:"l,string"`
+	Open        float64    `json:"o,string"`
+	Close       float64    `json:"c,string"`
+	Volume      float64    `json:"v,string"`
+	VolumeQuote float64    `json:"q,string"`
 }
-
-//type Candle struct {
-//	Timestamp   *time.Time `json:"timestamp,required"`
-//	Max         float64    `json:"h,string"`
-//	Min         float64    `json:"l,string"`
-//	Open        float64    `json:"o,string"`
-//	Close       float64    `json:"c,string"`
-//	Closed      bool       `json:"x,required"`
-//	Volume      float64    `json:"v,string"`
-//	QuoteVolume float64    `json:"q,string"`
-//}
 
 // Candles struct
 type Candles []Candle
@@ -289,6 +277,7 @@ func (r *Candle) UnmarshalJSON(data []byte) error {
 	r.Open = cast.ToFloat64(v[1])
 	r.Close = cast.ToFloat64(v[4])
 	r.Volume = cast.ToFloat64(v[5])
+	r.VolumeQuote = cast.ToFloat64(v[8])
 
 	timestamp := time.Unix(cast.ToInt64(strconv.Itoa(int(v[6].(float64)))[:10]), 0)
 	r.Timestamp = &timestamp
@@ -307,8 +296,7 @@ func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 	var v struct {
 		Symbol string `json:"s,required"`
 		Candle struct {
-			StartAt     int         `json:"t,required"`
-			EndAt       int         `json:"T,required"`
+			Timestamp   int         `json:"T,required"`
 			Max         interface{} `json:"h,required"`
 			Min         interface{} `json:"l,required"`
 			Open        interface{} `json:"o,required"`
@@ -327,7 +315,7 @@ func (r *CandlesStream) UnmarshalJSON(data []byte) error {
 	r.Symbol = v.Symbol
 	r.Period = Period(v.Candle.Period)
 
-	timestamp := time.Unix(cast.ToInt64(strconv.Itoa(v.Candle.EndAt)[:10]), 0)
+	timestamp := time.Unix(cast.ToInt64(strconv.Itoa(v.Candle.Timestamp)[:10]), 0)
 	candle := Candle{
 		Timestamp:   &timestamp,
 		Max:         cast.ToFloat64(v.Candle.Max.(string)),
