@@ -1,10 +1,19 @@
 package tests
 
 import (
+	"time"
+
 	"github.com/ramezanius/crypex/exchange/binance"
 	"github.com/ramezanius/crypex/exchange/hitbtc"
 )
 
+// Wait waits 10 second to receive data from readers.
+// the wait group cannot be used because the number of deltas is unknown.
+func Wait() {
+	time.Sleep(time.Second * 5)
+}
+
+// Repository struct
 type Repository struct{}
 
 // GetPrice returns price.

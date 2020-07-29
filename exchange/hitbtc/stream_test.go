@@ -1,31 +1,22 @@
 package hitbtc_test
 
 import (
-	"sync"
-
 	"github.com/ramezanius/crypex/exchange/hitbtc"
+	"github.com/ramezanius/crypex/exchange/tests"
 )
 
 func (suite *hitbtcSuite) TestSubscribeReports() {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
 	suite.NoError(
-		suite.exchange.SubscribeReports(func(response interface{}) {
-			wg.Done()
-		}),
+		suite.exchange.SubscribeReports(func(interface{}) {}),
 	)
 
 	suite.TestOrders()
 
-	wg.Wait()
+	tests.Wait()
 	suite.NoError(suite.exchange.UnsubscribeReports())
 }
 
 func (suite *hitbtcSuite) TestSubscribeCandles() {
-	wg := sync.WaitGroup{}
-	wg.Add(3)
-
 	params := hitbtc.CandlesParams{
 		Snapshot: true,
 		Period:   hitbtc.Period1Minute,
@@ -33,11 +24,9 @@ func (suite *hitbtcSuite) TestSubscribeCandles() {
 	}
 
 	suite.NoError(
-		suite.exchange.SubscribeCandles(params, func(response interface{}) {
-			wg.Done()
-		}),
+		suite.exchange.SubscribeCandles(params, func(interface{}) {}),
 	)
 
-	wg.Wait()
+	tests.Wait()
 	suite.NoError(suite.exchange.UnsubscribeCandles(params))
 }
