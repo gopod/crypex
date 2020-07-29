@@ -24,7 +24,7 @@ func (suite *binanceSuite) TestSubscribeReports() {
 
 func (suite *binanceSuite) TestSubscribeCandles() {
 	wg := sync.WaitGroup{}
-	wg.Add(4)
+	wg.Add(3)
 
 	params := binance.CandlesParams{
 		Snapshot: true,

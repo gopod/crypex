@@ -24,7 +24,7 @@ func (suite *hitbtcSuite) TestSubscribeReports() {
 
 func (suite *hitbtcSuite) TestSubscribeCandles() {
 	wg := sync.WaitGroup{}
-	wg.Add(4)
+	wg.Add(3)
 
 	params := hitbtc.CandlesParams{
 		Snapshot: true,
