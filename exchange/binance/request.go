@@ -20,10 +20,10 @@ func (b *Binance) GetSymbols() (response *Symbols, err error) {
 }
 
 // GetCandles returns symbol candles.
-func (b *Binance) GetCandles(params CandlesParams) (response *Candles, err error) {
+func (b *Binance) GetCandles(params CandlesParams) (response *[]Candle, err error) {
 	params.Symbol = strings.ToUpper(params.Symbol)
 
-	response = &Candles{}
+	response = &[]Candle{}
 
 	err = b.Request(exchange.RequestParams{
 		Method:   "GET",
