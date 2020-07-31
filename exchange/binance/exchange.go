@@ -26,7 +26,7 @@ const (
 // New returns a new binance.
 func New() *Binance {
 	return &Binance{
-		wsLimit:      ratelimit.New(5),
+		wsLimit:      ratelimit.New(1),
 		publicLimit:  ratelimit.New(20),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
