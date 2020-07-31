@@ -61,8 +61,8 @@ type Binance struct {
 
 	// Websocket connections
 	connections map[string]*websocket.Conn
-	// Public, Trading rate limits
-	publicLimit, tradingLimit ratelimit.Limiter
+	// Public, Trading, Websocket rate limits
+	publicLimit, tradingLimit, wsLimit ratelimit.Limiter
 
 	// Websocket listen key
 	ListenKey string

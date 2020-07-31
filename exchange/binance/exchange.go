@@ -26,6 +26,7 @@ const (
 // New returns a new binance.
 func New() *Binance {
 	return &Binance{
+		wsLimit:      ratelimit.New(5),
 		publicLimit:  ratelimit.New(20),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
@@ -171,6 +172,7 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 func (b *Binance) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
 	b.Lock()
 	defer b.Unlock()
+	b.wsLimit.Take()
 
 	var (
 		err  error
