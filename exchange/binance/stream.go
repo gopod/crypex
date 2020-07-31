@@ -34,7 +34,11 @@ func (b *Binance) read(event *exchange.Event, handler exchange.HandlerFunc) {
 
 // SubscribeReports subscribes to the reports.
 func (b *Binance) SubscribeReports(handler exchange.HandlerFunc) (err error) {
-	err = b.Stream(exchange.StreamParams{Auth: true, Endpoint: b.ListenKey}, handler)
+	err = b.Stream(exchange.StreamParams{
+		Auth:     true,
+		Endpoint: b.ListenKey,
+		Location: exchange.TradingLoc,
+	}, handler)
 
 	return
 }
@@ -44,8 +48,8 @@ func (b *Binance) UnsubscribeReports() (err error) {
 	b.Lock()
 	defer b.Unlock()
 
-	err = exchange.CloseConn(b.connections[b.ListenKey])
-	b.connections[b.ListenKey] = nil
+	err = exchange.CloseConn(b.connections[exchange.TradingLoc])
+	b.connections[exchange.TradingLoc] = nil
 
 	return
 }
@@ -72,8 +76,13 @@ func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.Handle
 		}, handler)
 	}
 
+	endpoint := fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period)
+
 	err = b.Stream(exchange.StreamParams{
-		Endpoint: fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period),
+		Endpoint: endpoint,
+		Method:   "SUBSCRIBE",
+		Params:   []string{endpoint},
+		Location: exchange.MarketLoc,
 	}, handler)
 
 	return
@@ -81,13 +90,13 @@ func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.Handle
 
 // UnsubscribeCandles unsubscribes from candles.
 func (b *Binance) UnsubscribeCandles(params CandlesParams) (err error) {
-	location := fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period)
+	endpoint := fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period)
 
-	b.Lock()
-	defer b.Unlock()
-
-	err = exchange.CloseConn(b.connections[location])
-	b.connections[location] = nil
+	err = b.Stream(exchange.StreamParams{
+		Method:   "UNSUBSCRIBE",
+		Params:   []string{endpoint},
+		Location: exchange.MarketLoc,
+	}, func(interface{}) {})
 
 	return
 }

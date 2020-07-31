@@ -3,6 +3,7 @@ package binance
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"time"
@@ -168,6 +169,14 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 
 // Stream returns a new connection with a specific endpoint.
 func (b *Binance) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
+	b.Lock()
+	defer b.Unlock()
+
+	var (
+		err  error
+		conn *websocket.Conn
+	)
+
 	if request.Auth {
 		err := b.Authenticate()
 		if err != nil {
@@ -177,18 +186,29 @@ func (b *Binance) Stream(request exchange.StreamParams, handler exchange.Handler
 		request.Endpoint = b.ListenKey
 	}
 
-	if request.Location == "" {
-		request.Location = request.Endpoint
-	}
+	if _, ok := b.connections[request.Location]; !ok {
+		conn, err = exchange.NewConn(streamURL, request.Endpoint, b.read, handler)
+		if err != nil {
+			return err
+		}
 
-	conn, err := exchange.NewConn(streamURL, request.Endpoint, b.read, handler)
-	if err != nil {
+		b.connections[request.Location] = conn
+
 		return err
+	} else {
+		conn = b.connections[request.Location]
 	}
 
-	b.Lock()
-	b.connections[request.Location] = conn
-	b.Unlock()
+	if request.Method != "" {
+		if request.ID != 0 {
+			request.ID = rand.Int()
+		}
+
+		err = conn.WriteJSON(request)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
