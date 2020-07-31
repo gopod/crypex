@@ -2,7 +2,6 @@ package converter
 
 import (
 	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/hitbtc"
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
@@ -20,7 +19,7 @@ func ToSymbol(cache Repository, currency string) (symbol *binance.Symbol, err er
 	if len(currency) >= 6 {
 		symbol = cache.GetSymbol(currency, binance.Exchange).(*binance.Symbol)
 		if symbol.ID == "" {
-			return nil, hitbtc.ErrSymbolNotFound
+			return nil, binance.ErrSymbolNotFound
 		}
 
 		return
