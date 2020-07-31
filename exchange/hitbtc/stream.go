@@ -35,8 +35,8 @@ func (h *HitBTC) read(event *exchange.Event, handler exchange.HandlerFunc) {
 func (h *HitBTC) SubscribeReports(handler exchange.HandlerFunc) (err error) {
 	err = h.Stream(exchange.StreamParams{
 		Auth:     true,
-		Location: "/trading",
 		Method:   "subscribeReports",
+		Location: exchange.TradingLoc,
 	}, handler)
 
 	return
@@ -47,8 +47,8 @@ func (h *HitBTC) UnsubscribeReports() (err error) {
 	h.Lock()
 	defer h.Unlock()
 
-	err = exchange.CloseConn(h.connections[h.SecretKey])
-	h.connections[h.SecretKey] = nil
+	err = exchange.CloseConn(h.connections[exchange.TradingLoc])
+	h.connections[exchange.TradingLoc] = nil
 
 	return
 }
@@ -76,8 +76,8 @@ func (h *HitBTC) SubscribeCandles(params CandlesParams, handler exchange.Handler
 	}
 
 	err = h.Stream(exchange.StreamParams{
+		Location: exchange.MarketLoc,
 		Method:   "subscribeCandles",
-		Location: "/public",
 		Params:   params,
 	}, handler)
 
@@ -87,8 +87,8 @@ func (h *HitBTC) SubscribeCandles(params CandlesParams, handler exchange.Handler
 // UnsubscribeCandles unsubscribes from candles.
 func (h *HitBTC) UnsubscribeCandles(params CandlesParams) (err error) {
 	err = h.Stream(exchange.StreamParams{
+		Location: exchange.MarketLoc,
 		Method:   "unsubscribeCandles",
-		Location: "/public",
 		Params:   params,
 	}, func(interface{}) {})
 

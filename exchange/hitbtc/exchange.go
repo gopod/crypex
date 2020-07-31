@@ -148,10 +148,6 @@ func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerF
 	h.Lock()
 	defer h.Unlock()
 
-	if request.Location == "" {
-		request.Location = request.Endpoint
-	}
-
 	var (
 		err  error
 		conn *websocket.Conn
