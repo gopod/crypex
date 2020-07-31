@@ -195,9 +195,9 @@ func (b *Binance) Stream(request exchange.StreamParams, handler exchange.Handler
 		b.connections[request.Location] = conn
 
 		return err
-	} else {
-		conn = b.connections[request.Location]
 	}
+
+	conn = b.connections[request.Location]
 
 	if request.Method != "" {
 		if request.ID != 0 {
