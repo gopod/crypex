@@ -201,4 +201,4 @@ Binance | `Klines`, `Reports` | `NewOrder`, `CancelOrder`, `GetSymbols`, `GetCan
 License
 =======
 
-This project is licensed under the terms of the [MIT](LICENCE) license.
+This project licensed under the terms of the [MIT](LICENCE) license.
