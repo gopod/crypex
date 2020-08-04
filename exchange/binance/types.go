@@ -286,22 +286,31 @@ func (r *Candle) UnmarshalJSON(data []byte) error {
 }
 
 func (r *Candles) UnmarshalJSON(data []byte) error {
-	var v struct {
-		Candles []struct {
-			Timestamp   *time.Time  `json:"T,required"`
-			Max         interface{} `json:"h,required"`
-			Min         interface{} `json:"l,required"`
-			Open        interface{} `json:"o,required"`
-			Close       interface{} `json:"c,required"`
-			Closed      bool        `json:"x,required"`
-			Symbol      string      `json:"s,required"`
-			Period      string      `json:"i,required"`
-			Volume      interface{} `json:"v,required"`
-			VolumeQuote interface{} `json:"q,required"`
-		} `json:"k,required"`
+	type candle struct {
+		Timestamp   *time.Time  `json:"T,required"`
+		Max         interface{} `json:"h,required"`
+		Min         interface{} `json:"l,required"`
+		Open        interface{} `json:"o,required"`
+		Close       interface{} `json:"c,required"`
+		Closed      bool        `json:"x,required"`
+		Symbol      string      `json:"s,required"`
+		Period      string      `json:"i,required"`
+		Volume      interface{} `json:"v,required"`
+		VolumeQuote interface{} `json:"q,required"`
 	}
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
+
+	var v struct {
+		Candles []candle `json:"k,required"`
+	}
+	err := json.Unmarshal(data, &v)
+	if err != nil {
+		if _, ok := err.(*json.UnmarshalTypeError); ok {
+			var v2 []candle
+			_ = json.Unmarshal(data, &v2)
+			v.Candles = v2
+		} else {
+			return err
+		}
 	}
 
 	for _, data := range v.Candles {
