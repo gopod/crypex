@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"go.uber.org/ratelimit"
@@ -23,12 +24,21 @@ func New() *HitBTC {
 		publicLimit:  ratelimit.New(100),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
+		wsLimit:      ratelimit.New(25, ratelimit.WithClock(Clock{})),
 	}
 }
 
 func (h *HitBTC) SetStreams(candles, reports exchange.HandlerFunc) {
 	h.candles = candles
 	h.reports = reports
+}
+
+func (c Clock) Now() time.Time {
+	return time.Now()
+}
+
+func (c Clock) Sleep(time.Duration) {
+	time.Sleep(time.Second * 30)
 }
 
 // Shutdown closes the underlying network connections.
@@ -152,6 +162,7 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
 	h.Lock()
 	defer h.Unlock()
+	h.wsLimit.Take()
 
 	var (
 		err  error
