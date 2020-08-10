@@ -24,7 +24,7 @@ func New() *HitBTC {
 		publicLimit:  ratelimit.New(100),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
-		wsLimit:      ratelimit.New(25, ratelimit.WithClock(Clock{})),
+		wsLimit:      ratelimit.New(5, ratelimit.WithClock(Clock{})),
 	}
 }
 
@@ -38,7 +38,7 @@ func (c Clock) Now() time.Time {
 }
 
 func (c Clock) Sleep(time.Duration) {
-	time.Sleep(time.Second * 30)
+	time.Sleep(time.Second * 20)
 }
 
 // Shutdown closes the underlying network connections.
