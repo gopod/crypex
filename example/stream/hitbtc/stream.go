@@ -10,6 +10,13 @@ var HitBTC *hitbtc.HitBTC
 
 func main() {
 	HitBTC = hitbtc.New()
+
+	HitBTC.SetStreams(func(response interface{}) {
+		log.Println("HitBTC[Candles] received:", response)
+	}, func(response interface{}) {
+		log.Println("HitBTC[Reports] received:", response)
+	})
+
 	HitBTC.PublicKey = "YOUR_HITBTC_PUBLIC_KEY"
 	HitBTC.SecretKey = "YOUR_HITBTC_SECRET_KEY"
 
@@ -28,10 +35,7 @@ func SubscribeReports() {
 		}
 	}()
 
-	err := HitBTC.SubscribeReports(
-		func(response interface{}) {
-			log.Println(response)
-		})
+	err := HitBTC.SubscribeReports()
 	if err != nil {
 		log.Panic(err)
 	}
@@ -45,10 +49,7 @@ func SubscribeCandles(params hitbtc.CandlesParams) {
 		}
 	}()
 
-	err := HitBTC.SubscribeCandles(
-		params, func(response interface{}) {
-			log.Println(response)
-		})
+	err := HitBTC.SubscribeCandles(params)
 	if err != nil {
 		log.Panic(err)
 	}

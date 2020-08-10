@@ -10,6 +10,13 @@ var Binance *binance.Binance
 
 func main() {
 	Binance = binance.New()
+
+	Binance.SetStreams(func(response interface{}) {
+		log.Println("Binance[Klines] received:", response)
+	}, func(response interface{}) {
+		log.Println("Binance[Reports] received:", response)
+	})
+
 	Binance.PublicKey = "YOUR_BINANCE_PUBLIC_KEY"
 	Binance.SecretKey = "YOUR_BINANCE_SECRET_KEY"
 
@@ -28,10 +35,7 @@ func SubscribeReports() {
 		}
 	}()
 
-	err := Binance.SubscribeReports(
-		func(response interface{}) {
-			log.Println(response)
-		})
+	err := Binance.SubscribeReports()
 	if err != nil {
 		log.Panic(err)
 	}
@@ -45,10 +49,7 @@ func SubscribeCandles(params binance.CandlesParams) {
 		}
 	}()
 
-	err := Binance.SubscribeCandles(
-		params, func(response interface{}) {
-			log.Println(response)
-		})
+	err := Binance.SubscribeCandles(params)
 	if err != nil {
 		log.Panic(err)
 	}
