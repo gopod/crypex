@@ -26,6 +26,11 @@ func New() *HitBTC {
 	}
 }
 
+func (h *HitBTC) SetStreams(candles, reports exchange.HandlerFunc) {
+	h.candles = candles
+	h.reports = reports
+}
+
 // Shutdown closes the underlying network connections.
 func (h *HitBTC) Shutdown() error {
 	for _, conn := range h.connections {

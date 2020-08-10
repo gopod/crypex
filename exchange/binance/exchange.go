@@ -33,6 +33,11 @@ func New() *Binance {
 	}
 }
 
+func (b *Binance) SetStreams(candles, reports exchange.HandlerFunc) {
+	b.candles = candles
+	b.reports = reports
+}
+
 // Shutdown closes the underlying network connections.
 func (b *Binance) Shutdown() error {
 	for _, conn := range b.connections {
