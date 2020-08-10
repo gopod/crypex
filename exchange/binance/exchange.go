@@ -29,7 +29,7 @@ func New() *Binance {
 		publicLimit:  ratelimit.New(20),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
-		wsLimit:      ratelimit.New(5, ratelimit.WithClock(Clock{})),
+		wsLimit:      ratelimit.New(1, ratelimit.WithClock(Clock{})),
 	}
 }
 
@@ -42,8 +42,8 @@ func (c Clock) Now() time.Time {
 	return time.Now()
 }
 
-func (c Clock) Sleep(time.Duration) {
-	time.Sleep(time.Second * 10)
+func (c Clock) Sleep(d time.Duration) {
+	time.Sleep(d * 2)
 }
 
 // Shutdown closes the underlying network connections.
