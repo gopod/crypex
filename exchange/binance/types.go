@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cast"
 	"go.uber.org/ratelimit"
+
+	"github.com/ramezanius/crypex/exchange"
 )
 
 const (
@@ -59,14 +61,16 @@ const (
 type Binance struct {
 	sync.RWMutex
 
-	// Websocket connections
+	// connections websocket pool
 	connections map[string]*websocket.Conn
-	// Public, Trading, Websocket rate limits
+	// publicLimit, tradingLimit, and wsLimit rate limits
 	publicLimit, tradingLimit, wsLimit ratelimit.Limiter
+	// Report, Candles handler function
+	reports, candles exchange.HandlerFunc
 
-	// Websocket listen key
+	// ListenKey websocket listen key
 	ListenKey string
-	// Public API key, Secret API key
+	// PublicKey, SecretKey API keys
 	PublicKey, SecretKey string
 }
 

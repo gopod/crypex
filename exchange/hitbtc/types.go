@@ -8,6 +8,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cast"
 	"go.uber.org/ratelimit"
+
+	"github.com/ramezanius/crypex/exchange"
 )
 
 const (
@@ -45,14 +47,19 @@ const (
 type HitBTC struct {
 	sync.RWMutex
 
-	// Websocket connections
+	// connections websocket pool
 	connections map[string]*websocket.Conn
-	// Public, Trading rate limits
-	publicLimit, tradingLimit ratelimit.Limiter
+	// publicLimit, tradingLimit, and wsLimit rate limits
+	publicLimit, tradingLimit, wsLimit ratelimit.Limiter
+	// Report, Candles handler function
+	reports, candles exchange.HandlerFunc
 
-	// Public API key, Secret API key
+	// PublicKey, SecretKey API keys
 	PublicKey, SecretKey string
 }
+
+// Clock custom websocket rate limit type
+type Clock struct{}
 
 // Period candles period type
 type Period string
