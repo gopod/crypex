@@ -26,16 +26,24 @@ const (
 // New returns a new binance.
 func New() *Binance {
 	return &Binance{
-		wsLimit:      ratelimit.New(1),
 		publicLimit:  ratelimit.New(20),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
+		wsLimit:      ratelimit.New(5, ratelimit.WithClock(Clock{})),
 	}
 }
 
 func (b *Binance) SetStreams(candles, reports exchange.HandlerFunc) {
 	b.candles = candles
 	b.reports = reports
+}
+
+func (c Clock) Now() time.Time {
+	return time.Now()
+}
+
+func (c Clock) Sleep(time.Duration) {
+	time.Sleep(time.Second * 10)
 }
 
 // Shutdown closes the underlying network connections.

@@ -74,6 +74,9 @@ type Binance struct {
 	PublicKey, SecretKey string
 }
 
+// Clock custom websocket rate limit type
+type Clock struct{}
+
 // Type order type
 type TimeInForce string
 
