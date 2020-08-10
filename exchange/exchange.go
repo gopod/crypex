@@ -78,6 +78,15 @@ func readMessages(conn *websocket.Conn, reader ReaderFunc, handler HandlerFunc) 
 			log.Fatalf("unmarshal payload: %v", err)
 		}
 
+		if _, ok := payload["error"]; ok {
+			go reader(&Event{
+				Params: msg,
+				Method: "error",
+			}, handler)
+
+			continue
+		}
+
 		// Serialize jsonrpc2 response message
 		if method, ok := payload["method"]; ok {
 			event.Method = string(method)
