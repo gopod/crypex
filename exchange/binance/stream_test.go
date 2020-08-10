@@ -6,9 +6,7 @@ import (
 )
 
 func (suite *binanceSuite) TestSubscribeReports() {
-	suite.NoError(
-		suite.exchange.SubscribeReports(func(interface{}) {}),
-	)
+	suite.NoError(suite.exchange.SubscribeReports())
 
 	suite.TestOrders()
 
@@ -23,10 +21,17 @@ func (suite *binanceSuite) TestSubscribeCandles() {
 		Symbol:   binance.BNB + binance.BTC,
 	}
 
-	suite.NoError(
-		suite.exchange.SubscribeCandles(params, func(interface{}) {}),
-	)
+	suite.NoError(suite.exchange.SubscribeCandles(params))
 
 	tests.Wait()
 	suite.NoError(suite.exchange.UnsubscribeCandles(params))
+
+	suite.Run("Fail", func() {
+		params := binance.CandlesParams{
+			Period: binance.Period1Minute,
+			Symbol: binance.USD + binance.BTC,
+		}
+
+		suite.NoError(suite.exchange.SubscribeCandles(params))
+	})
 }

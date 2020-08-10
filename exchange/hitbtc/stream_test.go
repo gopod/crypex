@@ -7,7 +7,7 @@ import (
 
 func (suite *hitbtcSuite) TestSubscribeReports() {
 	suite.NoError(
-		suite.exchange.SubscribeReports(func(interface{}) {}),
+		suite.exchange.SubscribeReports(),
 	)
 
 	suite.TestOrders()
@@ -23,10 +23,17 @@ func (suite *hitbtcSuite) TestSubscribeCandles() {
 		Symbol:   hitbtc.BTC + hitbtc.USD,
 	}
 
-	suite.NoError(
-		suite.exchange.SubscribeCandles(params, func(interface{}) {}),
-	)
+	suite.NoError(suite.exchange.SubscribeCandles(params))
 
 	tests.Wait()
 	suite.NoError(suite.exchange.UnsubscribeCandles(params))
+
+	suite.Run("Fail", func() {
+		params := hitbtc.CandlesParams{
+			Period: hitbtc.Period1Minute,
+			Symbol: hitbtc.USD + hitbtc.BTC,
+		}
+
+		suite.NoError(suite.exchange.SubscribeCandles(params))
+	})
 }
