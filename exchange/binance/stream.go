@@ -36,12 +36,16 @@ func (b *Binance) read(event *exchange.Event, handler exchange.HandlerFunc) {
 }
 
 // SubscribeReports subscribes to the reports.
-func (b *Binance) SubscribeReports(handler exchange.HandlerFunc) (err error) {
+func (b *Binance) SubscribeReports() (err error) {
+	if b.reports == nil {
+		return ErrHandlerNotSet
+	}
+
 	err = b.Stream(exchange.StreamParams{
 		Auth:     true,
 		Endpoint: b.ListenKey,
 		Location: exchange.TradingLoc,
-	}, handler)
+	}, b.reports)
 
 	return
 }
@@ -58,7 +62,11 @@ func (b *Binance) UnsubscribeReports() (err error) {
 }
 
 // SubscribeCandles subscribes to the candles.
-func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.HandlerFunc) (err error) {
+func (b *Binance) SubscribeCandles(params CandlesParams) (err error) {
+	if b.candles == nil {
+		return ErrHandlerNotSet
+	}
+
 	if params.Limit <= 0 {
 		params.Limit = 100
 	}
@@ -76,7 +84,7 @@ func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.Handle
 				Symbol:  strings.ToUpper(params.Symbol),
 				Candles: *snapshot,
 			},
-		}, handler)
+		}, b.candles)
 	}
 
 	endpoint := fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period)
@@ -86,7 +94,7 @@ func (b *Binance) SubscribeCandles(params CandlesParams, handler exchange.Handle
 		Method:   "SUBSCRIBE",
 		Params:   []string{endpoint},
 		Location: exchange.MarketLoc,
-	}, handler)
+	}, b.candles)
 
 	return
 }
