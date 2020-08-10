@@ -29,6 +29,9 @@ func (b *Binance) read(event *exchange.Event, handler exchange.HandlerFunc) {
 
 	case "kline":
 		redirect(&CandlesStream{})
+
+	case "error":
+		redirect(&APIError{})
 	}
 }
 

@@ -20,6 +20,9 @@ func (h *HitBTC) read(event *exchange.Event, handler exchange.HandlerFunc) {
 	}
 
 	switch event.Method {
+	case "error":
+		redirect(&APIError{})
+
 	case "report":
 		redirect(&ReportsStream{})
 
