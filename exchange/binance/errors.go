@@ -17,6 +17,8 @@ var (
 	ErrCurrencyNotFound = fmt.Errorf("currency not found")
 	// ErrSymbolNotFound error
 	ErrSymbolNotFound = fmt.Errorf("symbol not found")
+	// ErrHandlerNotSet error
+	ErrHandlerNotSet = fmt.Errorf("handlers not set")
 	// ErrKeysNotSet error
 	ErrKeysNotSet = fmt.Errorf("binance api keys are not set")
 )
