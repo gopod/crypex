@@ -294,16 +294,16 @@ func (r *Candle) UnmarshalJSON(data []byte) error {
 
 func (r *Candles) UnmarshalJSON(data []byte) error {
 	type candle struct {
-		Timestamp   *time.Time  `json:"T,required"`
-		Max         interface{} `json:"h,required"`
-		Min         interface{} `json:"l,required"`
-		Open        interface{} `json:"o,required"`
-		Close       interface{} `json:"c,required"`
-		Closed      bool        `json:"x,required"`
-		Symbol      string      `json:"s,required"`
-		Period      string      `json:"i,required"`
-		Volume      interface{} `json:"v,required"`
-		VolumeQuote interface{} `json:"q,required"`
+		Timestamp   *time.Time `json:"T,required"`
+		Max         string     `json:"h,required"`
+		Min         string     `json:"l,required"`
+		Open        string     `json:"o,required"`
+		Close       string     `json:"c,required"`
+		Closed      bool       `json:"x,required"`
+		Symbol      string     `json:"s,required"`
+		Period      string     `json:"i,required"`
+		Volume      string     `json:"v,required"`
+		VolumeQuote string     `json:"q,required"`
 	}
 
 	var v struct {
@@ -323,12 +323,12 @@ func (r *Candles) UnmarshalJSON(data []byte) error {
 	for _, data := range v.Candles {
 		candle := Candle{
 			Timestamp:   data.Timestamp,
-			Max:         cast.ToFloat64(data.Max.(string)),
-			Min:         cast.ToFloat64(data.Min.(string)),
-			Open:        cast.ToFloat64(data.Open.(string)),
-			Close:       cast.ToFloat64(data.Close.(string)),
-			Volume:      cast.ToFloat64(data.Volume.(string)),
-			VolumeQuote: cast.ToFloat64(data.VolumeQuote.(string)),
+			Max:         cast.ToFloat64(data.Max),
+			Min:         cast.ToFloat64(data.Min),
+			Open:        cast.ToFloat64(data.Open),
+			Close:       cast.ToFloat64(data.Close),
+			Volume:      cast.ToFloat64(data.Volume),
+			VolumeQuote: cast.ToFloat64(data.VolumeQuote),
 		}
 
 		*r = append(*r, candle)
