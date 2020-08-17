@@ -46,9 +46,10 @@ func (suite *hitbtcSuite) TestOrders() {
 		suite.NoError(err)
 		suite.NotEmpty(order)
 
-		suite.Equal(order.Side, newRequest.Side)
-		suite.Equal(order.Price, newRequest.Price)
-		suite.Equal(order.Quantity, newRequest.Quantity)
+		suite.Equal(newRequest.Side, order.Side)
+		suite.Equal(newRequest.Price, order.Price)
+		suite.Equal(newRequest.Quantity, order.Quantity)
+		suite.NotEmpty(order.CreatedAt, order.UpdatedAt)
 
 		newRequest.OrderID = order.OrderID
 	})
