@@ -82,7 +82,7 @@ func (b *Binance) SubscribeCandles(params CandlesParams) (err error) {
 			Params: &CandlesStream{
 				Period:  params.Period,
 				Symbol:  strings.ToUpper(params.Symbol),
-				Candles: *snapshot,
+				Candles: Candles(*snapshot),
 			},
 		}, b.candles)
 	}
