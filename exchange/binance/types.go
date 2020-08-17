@@ -122,19 +122,19 @@ type AssetsResponse struct {
 
 // Report struct
 type Report struct {
-	ID              int64       `json:"i,required"`
-	Side            Side        `json:"S,required"`
-	Type            Type        `json:"o,required"`
-	Price           float64     `json:"p,string"`
-	Symbol          string      `json:"s,required"`
-	Status          string      `json:"x,required"`
-	Quantity        float64     `json:"q,string"`
-	StopPrice       float64     `json:"P,string"`
-	CreatedAt       *time.Time  `json:"O,required"`
-	UpdatedAt       *time.Time  `json:"T,required"`
-	TimeInForce     TimeInForce `json:"f,required"`
-	OrderID         string      `json:"c,required"`
-	OriginalOrderID string      `json:"C,omitempty"`
+	ID              int64       `json:"orderId,required"`
+	Side            Side        `json:"side,required"`
+	Type            Type        `json:"type,required"`
+	Price           float64     `json:"price,string"`
+	Symbol          string      `json:"symbol,required"`
+	Status          string      `json:"status,required"`
+	Quantity        float64     `json:"quantity,string"`
+	StopPrice       float64     `json:"stopPrice,string"`
+	UpdatedAt       time.Time   `json:"createdAt,required"`
+	CreatedAt       time.Time   `json:"updatedAt,required"`
+	TimeInForce     TimeInForce `json:"timeInForce,required"`
+	OrderID         string      `json:"clientOrderId,required"`
+	OriginalOrderID string      `json:"origClientOrderId,omitempty"`
 }
 
 // ReportsStream response
@@ -148,17 +148,21 @@ func (r *ReportsStream) UnmarshalJSON(data []byte) error {
 		Price           float64     `json:"p,string"`
 		Symbol          string      `json:"s,required"`
 		Status          string      `json:"x,required"`
+		OrderID         string      `json:"c,required"`
 		Quantity        float64     `json:"q,string"`
 		StopPrice       float64     `json:"P,string"`
 		CreatedAt       int         `json:"O,required"`
 		UpdatedAt       int         `json:"T,required"`
 		TimeInForce     TimeInForce `json:"f,required"`
-		OrderID         string      `json:"c,required"`
 		OriginalOrderID string      `json:"C,omitempty"`
 	}
 
 	if err := json.Unmarshal(data, &v); err != nil {
 		return err
+	}
+
+	if v.UpdatedAt == -1 {
+		v.UpdatedAt = v.CreatedAt
 	}
 
 	r.ID = v.ID
@@ -172,16 +176,8 @@ func (r *ReportsStream) UnmarshalJSON(data []byte) error {
 	r.StopPrice = v.StopPrice
 	r.TimeInForce = v.TimeInForce
 	r.OriginalOrderID = v.OriginalOrderID
-
-	if v.UpdatedAt == -1 {
-		v.UpdatedAt = v.CreatedAt
-	}
-
-	createdAt := time.Unix(cast.ToInt64(strconv.Itoa(v.CreatedAt)[:10]), 0)
-	updatedAt := time.Unix(cast.ToInt64(strconv.Itoa(v.UpdatedAt)[:10]), 0)
-
-	r.CreatedAt = &createdAt
-	r.UpdatedAt = &updatedAt
+	r.CreatedAt = time.Unix(cast.ToInt64(strconv.Itoa(v.CreatedAt)[:10]), 0)
+	r.UpdatedAt = time.Unix(cast.ToInt64(strconv.Itoa(v.UpdatedAt)[:10]), 0)
 
 	return nil
 }
@@ -196,7 +192,7 @@ type Order struct {
 	Status          string      `json:"status,required"`
 	Quantity        float64     `json:"origQty,string"`
 	StopPrice       float64     `json:"stopPrice,omitempty"`
-	TransactAt      *time.Time  `json:"transactTime,omitempty"`
+	TransactAt      time.Time   `json:"transactTime,omitempty"`
 	TimeInForce     TimeInForce `json:"timeInForce,required"`
 	OrderID         string      `json:"clientOrderId,required"`
 	OriginalOrderID string      `json:"origClientOrderId,omitempty"`
@@ -207,18 +203,8 @@ type OrderResponse Order
 
 func (r *OrderResponse) UnmarshalJSON(data []byte) error {
 	var v struct {
-		ID              int64       `json:"orderId,required"`
-		Side            Side        `json:"side,required"`
-		Type            Type        `json:"type,required"`
-		Price           float64     `json:"price,string"`
-		Symbol          string      `json:"symbol,required"`
-		Status          string      `json:"status,required"`
-		Quantity        float64     `json:"origQty,string"`
-		StopPrice       float64     `json:"stopPrice,omitempty"`
-		TransactAt      int         `json:"transactTime,omitempty"`
-		TimeInForce     TimeInForce `json:"timeInForce,required"`
-		OrderID         string      `json:"clientOrderId,required"`
-		OriginalOrderID string      `json:"origClientOrderId,omitempty"`
+		*Order
+		TransactAt int `json:"transactTime,omitempty"`
 	}
 
 	if err := json.Unmarshal(data, &v); err != nil {
@@ -238,8 +224,7 @@ func (r *OrderResponse) UnmarshalJSON(data []byte) error {
 	r.OriginalOrderID = v.OriginalOrderID
 
 	if v.TransactAt != 0 {
-		transactAt := time.Unix(cast.ToInt64(strconv.Itoa(v.TransactAt)[:10]), 0)
-		r.TransactAt = &transactAt
+		r.TransactAt = time.Unix(cast.ToInt64(strconv.Itoa(v.TransactAt)[:10]), 0)
 	}
 
 	return nil
