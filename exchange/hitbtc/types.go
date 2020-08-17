@@ -176,32 +176,28 @@ func (r *OrderResponse) UnmarshalJSON(data []byte) error {
 
 // NewOrder struct
 type NewOrder struct {
-	Side  Side    `json:"side,required"`
-	Type  Type    `json:"type,required"`
-	Price float64 `json:"price,string"`
-
-	Symbol   string  `json:"symbol,required"`
-	Quantity float64 `json:"quantity,string"`
-	OrderID  string  `json:"clientOrderId,required"`
-
-	StopPrice  float64    `json:"stopPrice,omitempty"`
-	ExpireTime *time.Time `json:"expireTime,omitempty"`
-
-	PostOnly       bool   `json:"postOnly,omitempty"`
-	TimeInForce    string `json:"timeInForce,omitempty"`
-	StrictValidate bool   `json:"strictValidate,omitempty"`
+	Side           Side       `json:"side,required"`
+	Type           Type       `json:"type,required"`
+	Price          float64    `json:"price,string"`
+	Symbol         string     `json:"symbol,required"`
+	OrderID        string     `json:"clientOrderId,required"`
+	PostOnly       bool       `json:"postOnly,omitempty"`
+	Quantity       float64    `json:"quantity,string"`
+	StopPrice      float64    `json:"stopPrice,omitempty"`
+	ExpireTime     *time.Time `json:"expireTime,omitempty"`
+	TimeInForce    string     `json:"timeInForce,omitempty"`
+	StrictValidate bool       `json:"strictValidate,omitempty"`
 }
 
 // Candle struct
 type Candle struct {
-	Min   float64 `json:"min,string"`
-	Max   float64 `json:"max,string"`
-	Open  float64 `json:"open,string"`
-	Close float64 `json:"close,string"`
-
-	Volume      float64    `json:"volume,string"`
-	Timestamp   *time.Time `json:"timestamp,required"`
-	VolumeQuote float64    `json:"volumeQuote,string"`
+	Min         float64   `json:"min,string"`
+	Max         float64   `json:"max,string"`
+	Open        float64   `json:"open,string"`
+	Close       float64   `json:"close,string"`
+	Volume      float64   `json:"volume,string"`
+	Timestamp   time.Time `json:"timestamp,required"`
+	VolumeQuote float64   `json:"volumeQuote,string"`
 }
 
 // Candles struct
