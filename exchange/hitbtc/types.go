@@ -140,6 +140,40 @@ func (r *ReportsStream) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Order struct
+type Order Report
+
+// OrderResponse struct
+type OrderResponse Order
+
+func (r *OrderResponse) UnmarshalJSON(data []byte) error {
+	var v struct {
+		*Order
+		ID              int64  `json:"id,required"`
+		OriginalOrderID string `json:"originalRequestClientOrderId,omitempty"`
+	}
+
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	r.ID = v.ID
+	r.Side = v.Side
+	r.Type = v.Type
+	r.Price = v.Price
+	r.Symbol = v.Symbol
+	r.Status = v.Status
+	r.OrderID = v.OrderID
+	r.Quantity = v.Quantity
+	r.StopPrice = v.StopPrice
+	r.UpdatedAt = v.UpdatedAt
+	r.CreatedAt = v.CreatedAt
+	r.TimeInForce = v.TimeInForce
+	r.OriginalOrderID = v.OriginalOrderID
+
+	return nil
+}
+
 // NewOrder struct
 type NewOrder struct {
 	Side  Side    `json:"side,required"`

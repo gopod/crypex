@@ -47,12 +47,12 @@ func (h *HitBTC) GetBalances() (response *Assets, err error) {
 }
 
 // NewOrder creates a new order.
-func (h *HitBTC) NewOrder(params NewOrder) (response *ReportsStream, err error) {
+func (h *HitBTC) NewOrder(params NewOrder) (response *OrderResponse, err error) {
 	if params.OrderID == "" {
 		params.OrderID = util.GenerateUUID()
 	}
 
-	response = &ReportsStream{}
+	response = &OrderResponse{}
 
 	err = h.Request(exchange.RequestParams{
 		Auth:     true,
@@ -65,8 +65,8 @@ func (h *HitBTC) NewOrder(params NewOrder) (response *ReportsStream, err error) 
 }
 
 // CancelOrder cancels an order.
-func (h *HitBTC) CancelOrder(orderID string) (response *ReportsStream, err error) {
-	response = &ReportsStream{}
+func (h *HitBTC) CancelOrder(orderID string) (response *OrderResponse, err error) {
+	response = &OrderResponse{}
 
 	err = h.Request(exchange.RequestParams{
 		Auth:     true,
