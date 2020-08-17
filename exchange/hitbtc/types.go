@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/spf13/cast"
 	"go.uber.org/ratelimit"
 
 	"github.com/ramezanius/crypex/exchange"
@@ -96,22 +95,19 @@ type AssetsResponse Assets
 
 // Report struct
 type Report struct {
-	ID    int64   `json:"id,string"`
-	Side  Side    `json:"side,required"`
-	Type  Type    `json:"type,required"`
-	Price float64 `json:"price,string"`
-
-	Symbol    string  `json:"symbol,required"`
-	Status    string  `json:"status,required"`
-	Quantity  float64 `json:"quantity,string"`
-	StopPrice bool    `json:"stopPrice,omitempty"`
-
-	CreatedAt time.Time `json:"createdAt,required"`
-	UpdatedAt time.Time `json:"updatedAt,required"`
-
-	TimeInForce     string `json:"timeInForce,omitempty"`
-	OrderID         string `json:"clientOrderId,required"`
-	OriginalOrderID string `json:"originalRequestClientOrderId,omitempty"`
+	ID              int64     `json:"orderId,string"`
+	Side            Side      `json:"side,required"`
+	Type            Type      `json:"type,required"`
+	Price           float64   `json:"price,string"`
+	Symbol          string    `json:"symbol,required"`
+	Status          string    `json:"status,required"`
+	OrderID         string    `json:"clientOrderId,required"`
+	Quantity        float64   `json:"quantity,string"`
+	StopPrice       bool      `json:"stopPrice,omitempty"`
+	CreatedAt       time.Time `json:"createdAt,required"`
+	UpdatedAt       time.Time `json:"updatedAt,required"`
+	TimeInForce     string    `json:"timeInForce,omitempty"`
+	OriginalOrderID string    `json:"origClientOrderId,omitempty"`
 }
 
 // ReportsStream struct
@@ -119,21 +115,7 @@ type ReportsStream Report
 
 func (r *ReportsStream) UnmarshalJSON(data []byte) error {
 	var v struct {
-		ID    interface{} `json:"id,required"`
-		Side  Side        `json:"side,required"`
-		Type  Type        `json:"type,required"`
-		Price float64     `json:"price,string"`
-
-		Symbol    string  `json:"symbol,required"`
-		Status    string  `json:"status,required"`
-		Quantity  float64 `json:"quantity,string"`
-		StopPrice bool    `json:"stopPrice,omitempty"`
-
-		CreatedAt time.Time `json:"createdAt,required"`
-		UpdatedAt time.Time `json:"updatedAt,required"`
-
-		TimeInForce     string `json:"timeInForce,omitempty"`
-		OrderID         string `json:"clientOrderId,required"`
+		*Report
 		OriginalOrderID string `json:"originalRequestClientOrderId,omitempty"`
 	}
 
@@ -141,7 +123,7 @@ func (r *ReportsStream) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	r.ID = cast.ToInt64(v.ID)
+	r.ID = v.ID
 	r.Side = v.Side
 	r.Type = v.Type
 	r.Price = v.Price
