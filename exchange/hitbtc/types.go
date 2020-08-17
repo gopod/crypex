@@ -180,6 +180,9 @@ type CandlesStream struct {
 	Period  Period  `json:"period,required"`
 }
 
+// CandlesResponse struct
+type CandlesResponse Candles
+
 // CandlesParams struct
 type CandlesParams struct {
 	Snapshot bool `json:"-"`
