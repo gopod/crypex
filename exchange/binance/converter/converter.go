@@ -5,7 +5,7 @@ import (
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
-var binanceCurrencies = []string{binance.USD, binance.BTC, binance.ETH, binance.BNB}
+var binanceCurrencies = [4]string{binance.USD, binance.BTC, binance.ETH, binance.BNB}
 
 // Repository caching exchange repository
 type Repository interface {
