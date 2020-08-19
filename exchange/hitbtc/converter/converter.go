@@ -5,7 +5,7 @@ import (
 	"github.com/ramezanius/crypex/exchange/util"
 )
 
-var hitbtcCurrencies = []string{hitbtc.USD, hitbtc.BTC, hitbtc.ETH}
+var hitbtcCurrencies = [3]string{hitbtc.USD, hitbtc.BTC, hitbtc.ETH}
 
 // Repository caching exchange repository
 type Repository interface {
