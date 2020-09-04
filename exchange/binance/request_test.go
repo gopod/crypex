@@ -1,7 +1,7 @@
 package binance_test
 
 import (
-	"github.com/ramezanius/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/binance"
 )
 
 func (suite *binanceSuite) TestGetSymbols() {

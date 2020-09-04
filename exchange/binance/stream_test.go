@@ -1,8 +1,8 @@
 package binance_test
 
 import (
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/tests"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/tests"
 )
 
 func (suite *binanceSuite) TestSubscribeReports() {

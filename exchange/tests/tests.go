@@ -3,8 +3,8 @@ package tests
 import (
 	"time"
 
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/hitbtc"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/hitbtc"
 )
 
 // Wait waits 10 second to receive data from readers.

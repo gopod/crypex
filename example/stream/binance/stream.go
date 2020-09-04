@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/ramezanius/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/binance"
 )
 
 var Binance *binance.Binance

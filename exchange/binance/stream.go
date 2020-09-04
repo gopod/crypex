@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ramezanius/crypex/exchange"
+	"github.com/gopod/crypex/exchange"
 )
 
 // read redirects response to handler.

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ramezanius/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/binance"
 )
 
 type binanceSuite struct {

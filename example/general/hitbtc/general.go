@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/ramezanius/crypex/exchange/hitbtc"
-	"github.com/ramezanius/crypex/exchange/hitbtc/converter"
-	"github.com/ramezanius/crypex/exchange/tests"
+	"github.com/gopod/crypex/exchange/hitbtc"
+	"github.com/gopod/crypex/exchange/hitbtc/converter"
+	"github.com/gopod/crypex/exchange/tests"
 )
 
 var HitBTC *hitbtc.HitBTC

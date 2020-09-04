@@ -5,9 +5,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ramezanius/crypex/cache"
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/hitbtc"
+	"github.com/gopod/crypex/cache"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/hitbtc"
 )
 
 const testLimit = 100

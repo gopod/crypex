@@ -1,7 +1,7 @@
 package hitbtc_test
 
 import (
-	"github.com/ramezanius/crypex/exchange/hitbtc"
+	"github.com/gopod/crypex/exchange/hitbtc"
 )
 
 func (suite *hitbtcSuite) TestGetSymbols() {

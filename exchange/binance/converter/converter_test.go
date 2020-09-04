@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/binance/converter"
-	Tests "github.com/ramezanius/crypex/exchange/tests"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/binance/converter"
+	Tests "github.com/gopod/crypex/exchange/tests"
 )
 
 type binanceConverterSuite struct {

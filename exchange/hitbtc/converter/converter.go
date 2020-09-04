@@ -1,8 +1,8 @@
 package converter
 
 import (
-	"github.com/ramezanius/crypex/exchange/hitbtc"
-	"github.com/ramezanius/crypex/exchange/util"
+	"github.com/gopod/crypex/exchange/hitbtc"
+	"github.com/gopod/crypex/exchange/util"
 )
 
 var hitbtcCurrencies = []string{hitbtc.USD, hitbtc.BTC, hitbtc.ETH}

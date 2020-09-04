@@ -11,8 +11,8 @@ import (
 	"github.com/gorilla/websocket"
 	"go.uber.org/ratelimit"
 
-	"github.com/ramezanius/crypex/exchange"
-	"github.com/ramezanius/crypex/exchange/util"
+	"github.com/gopod/crypex/exchange"
+	"github.com/gopod/crypex/exchange/util"
 )
 
 const (

@@ -3,8 +3,8 @@ package hitbtc
 import (
 	"fmt"
 
-	"github.com/ramezanius/crypex/exchange"
-	"github.com/ramezanius/crypex/exchange/util"
+	"github.com/gopod/crypex/exchange"
+	"github.com/gopod/crypex/exchange/util"
 )
 
 // GetSymbols returns exchange symbols.

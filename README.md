@@ -1,13 +1,13 @@
 Crypex
 ======
 
-[![Build](https://img.shields.io/github/workflow/status/ramezanius/crypex/Continuous%20Integration?label=build)](https://github.com/ramezanius/crypex/actions)
-[![Coverage](https://img.shields.io/codacy/coverage/6996e8a7fdb845eea86f02740f57e94b?label=coverage)](https://app.codacy.com/manual/ramezanius/crypex/dashboard?bid=18899044#coverageData)
-[![Issues](https://img.shields.io/github/issues/ramezanius/crypex?label=issues)](https://github.com/ramezanius/crypex/issues)
-[![PullRequests](https://img.shields.io/github/issues-pr/ramezanius/crypex?label=pull%20requests)](https://github.com/ramezanius/crypex/pulls)
-[![CodeSize](https://img.shields.io/github/languages/code-size/ramezanius/crypex?label=code%20size)](https://github.com/ramezanius/crypex)
-[![CodeQuality](https://img.shields.io/codacy/grade/6996e8a7fdb845eea86f02740f57e94b?label=code%20quality)](https://app.codacy.com/manual/ramezanius/crypex/dashboard?bid=18899044#issuesData)
-[![Licence](https://img.shields.io/github/license/ramezanius/crypex?label=licence)](https://github.com/ramezanius/crypex/blob/master/LICENCE)
+[![Build](https://img.shields.io/github/workflow/status/gopod/crypex/Continuous%20Integration?label=build)](https://github.com/gopod/crypex/actions)
+[![Coverage](https://img.shields.io/codacy/coverage/006240f7b0a0451b9479b907e24640e2?label=coverage)](https://app.codacy.com/manual/gopod/crypex/dashboard?bid=18899044#coverageData)
+[![Issues](https://img.shields.io/github/issues/gopod/crypex?label=issues)](https://github.com/gopod/crypex/issues)
+[![PullRequests](https://img.shields.io/github/issues-pr/gopod/crypex?label=pull%20requests)](https://github.com/gopod/crypex/pulls)
+[![CodeSize](https://img.shields.io/github/languages/code-size/gopod/crypex?label=code%20size)](https://github.com/gopod/crypex)
+[![CodeQuality](https://img.shields.io/codacy/grade/006240f7b0a0451b9479b907e24640e2?label=code%20quality)](https://app.codacy.com/manual/gopod/crypex/dashboard?bid=18899044#issuesData)
+[![Licence](https://img.shields.io/github/license/gopod/crypex?label=licence)](https://github.com/gopod/crypex/blob/master/LICENCE)
 
 Crypex is a Go package for trading and communicating with [various](#supported-exchanges) exchange API for cryptocurrency assets!
 
@@ -19,7 +19,7 @@ Features include:
 Get started:
 
   * Install crypex with [one line of code](#installation), or [update it with another](#staying-up-to-date)
-  * Check out the [Go Doc](https://godoc.org/github.com/ramezanius/crypex) API Documentation
+  * Check out the [Go Doc](https://godoc.org/github.com/gopod/crypex) API Documentation
   * A little about [Crypto currency](https://en.wikipedia.org/wiki/Cryptocurrency)
 
 
@@ -34,8 +34,8 @@ See it in action:
 import (
 	"log"
 
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/hitbtc"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/hitbtc"
 )
 
 var HitBTC *hitbtc.HitBTC
@@ -134,12 +134,12 @@ An example convert is shown below:
 import (
 	"log"
 
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/hitbtc"
-	"github.com/ramezanius/crypex/exchange/tests"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/hitbtc"
+	"github.com/gopod/crypex/exchange/tests"
 
-	BinanceConverter "github.com/ramezanius/crypex/exchange/binance/converter"
-	HitBTCConverter "github.com/ramezanius/crypex/exchange/hitbtc/converter"
+	BinanceConverter "github.com/gopod/crypex/exchange/binance/converter"
+	HitBTCConverter "github.com/gopod/crypex/exchange/hitbtc/converter"
 )
 
 func main() {
@@ -170,21 +170,21 @@ Installation
 
 To install Crypex, use `go get`:
 
-    go get github.com/ramezanius/crypex
+    go get github.com/gopod/crypex
 
 This will then make the following packages available to you:
 
-    github.com/ramezanius/crypex/exchange/hitbtc
-    github.com/ramezanius/crypex/exchange/hitbtc/converter
-    github.com/ramezanius/crypex/exchange/binance
-    github.com/ramezanius/crypex/exchange/binance/converter
+    github.com/gopod/crypex/exchange/hitbtc
+    github.com/gopod/crypex/exchange/hitbtc/converter
+    github.com/gopod/crypex/exchange/binance
+    github.com/gopod/crypex/exchange/binance/converter
 
 ------
 
 Staying up to date
 ==================
 
-To update Crypex to the latest version, use `go get -u github.com/ramezanius/crypex`.
+To update Crypex to the latest version, use `go get -u github.com/gopod/crypex`.
 
 ------
 

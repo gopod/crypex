@@ -1,4 +1,4 @@
-module github.com/ramezanius/crypex
+module github.com/gopod/crypex
 
 go 1.14
 

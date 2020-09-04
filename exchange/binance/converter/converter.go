@@ -1,8 +1,8 @@
 package converter
 
 import (
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/util"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/util"
 )
 
 var binanceCurrencies = []string{binance.USD, binance.BTC, binance.ETH, binance.BNB}

@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/ramezanius/crypex/exchange/binance"
-	"github.com/ramezanius/crypex/exchange/binance/converter"
-	"github.com/ramezanius/crypex/exchange/tests"
+	"github.com/gopod/crypex/exchange/binance"
+	"github.com/gopod/crypex/exchange/binance/converter"
+	"github.com/gopod/crypex/exchange/tests"
 )
 
 var Binance *binance.Binance
