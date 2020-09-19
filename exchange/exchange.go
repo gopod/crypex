@@ -18,11 +18,11 @@ type (
 	// HandlerFunc func
 	HandlerFunc func(interface{})
 	// ReaderFunc func
-	ReaderFunc func(*Event, HandlerFunc)
+	ReaderFunc func(*Event)
 )
 
 // NewConn creates a new websocket client connection.
-func NewConn(stream, endpoint string, reader ReaderFunc, handler HandlerFunc) (conn *websocket.Conn, err error) {
+func NewConn(stream, endpoint string, reader ReaderFunc) (conn *websocket.Conn, err error) {
 	var url string
 
 	if endpoint == "" {
@@ -36,7 +36,7 @@ func NewConn(stream, endpoint string, reader ReaderFunc, handler HandlerFunc) (c
 		return
 	}
 
-	go readMessages(conn, reader, handler)
+	go readMessages(conn, reader)
 
 	return
 }
@@ -57,7 +57,7 @@ func CloseConn(conn *websocket.Conn) (err error) {
 
 // readMessages reads the next JSON-encoded message from the connection
 // and send it to the reader func with handler.
-func readMessages(conn *websocket.Conn, reader ReaderFunc, handler HandlerFunc) {
+func readMessages(conn *websocket.Conn, reader ReaderFunc) {
 	for {
 		var (
 			event   = &Event{}
@@ -82,7 +82,7 @@ func readMessages(conn *websocket.Conn, reader ReaderFunc, handler HandlerFunc) 
 			go reader(&Event{
 				Params: msg,
 				Method: "error",
-			}, handler)
+			})
 
 			continue
 		}
@@ -112,7 +112,7 @@ func readMessages(conn *websocket.Conn, reader ReaderFunc, handler HandlerFunc) 
 			}
 		}
 
-		go reader(event, handler)
+		go reader(event)
 	}
 
 	err := CloseConn(conn)

@@ -21,16 +21,16 @@ const (
 // New returns a new hitbtc.
 func New() *HitBTC {
 	return &HitBTC{
+		Feeds: &Feeds{
+			Reports: make(chan *ReportsStream),
+			Candles: make(chan *CandlesStream),
+		},
+
 		publicLimit:  ratelimit.New(100),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
 		wsLimit:      ratelimit.New(5, ratelimit.WithClock(Clock{})),
 	}
-}
-
-func (h *HitBTC) SetStreams(candles, reports exchange.HandlerFunc) {
-	h.candles = candles
-	h.reports = reports
 }
 
 func (c Clock) Now() time.Time {
@@ -159,7 +159,11 @@ func (h *HitBTC) Request(request exchange.RequestParams, response interface{}) e
 
 // Stream returns a new connection and writes a request
 // to the connection if there's a method.
-func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
+func (h *HitBTC) Stream(request exchange.StreamParams) error {
+	if h.OnErr == nil {
+		return ErrOnErrNotSet
+	}
+
 	h.Lock()
 	defer h.Unlock()
 	h.wsLimit.Take()
@@ -170,7 +174,7 @@ func (h *HitBTC) Stream(request exchange.StreamParams, handler exchange.HandlerF
 	)
 
 	if _, ok := h.connections[request.Location]; !ok {
-		conn, err = exchange.NewConn(streamURL, request.Endpoint, h.read, handler)
+		conn, err = exchange.NewConn(streamURL, request.Endpoint, h.read)
 		if err != nil {
 			return err
 		}

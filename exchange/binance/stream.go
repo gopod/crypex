@@ -3,49 +3,56 @@ package binance
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/gopod/crypex/exchange"
 )
 
 // read redirects response to handler.
-func (b *Binance) read(event *exchange.Event, handler exchange.HandlerFunc) {
-	var redirect = func(response interface{}) {
-		err := json.Unmarshal(event.Params.([]byte), &response)
-		if err != nil {
-			log.Fatalf("unmarshal response: [binance]: %v", err)
-		}
-
-		go handler(response)
-	}
-
+func (b *Binance) read(event *exchange.Event) {
 	switch event.Method {
 	case "executionReport":
-		redirect(&ReportsStream{})
+		object := &ReportsStream{}
+
+		err := json.Unmarshal(event.Params.([]byte), &object)
+		if err != nil {
+			b.OnErr(err)
+		}
+
+		b.Feeds.Reports <- object
 
 	case "klines":
-		go handler(event.Params.(*CandlesStream))
+		b.Feeds.Candles <- event.Params.(*CandlesStream)
 
 	case "kline":
-		redirect(&CandlesStream{})
+		object := &CandlesStream{}
+
+		err := json.Unmarshal(event.Params.([]byte), &object)
+		if err != nil {
+			b.OnErr(err)
+		}
+
+		b.Feeds.Candles <- object
 
 	case "error":
-		redirect(&APIError{})
+		object := &APIError{}
+
+		err := json.Unmarshal(event.Params.([]byte), &object)
+		if err != nil {
+			b.OnErr(err)
+		}
+
+		b.OnErr(object)
 	}
 }
 
 // SubscribeReports subscribes to the reports.
 func (b *Binance) SubscribeReports() (err error) {
-	if b.reports == nil {
-		return ErrHandlerNotSet
-	}
-
 	err = b.Stream(exchange.StreamParams{
 		Auth:     true,
 		Endpoint: b.ListenKey,
 		Location: exchange.TradingLoc,
-	}, b.reports)
+	})
 
 	return
 }
@@ -63,10 +70,6 @@ func (b *Binance) UnsubscribeReports() (err error) {
 
 // SubscribeCandles subscribes to the candles.
 func (b *Binance) SubscribeCandles(params CandlesParams) (err error) {
-	if b.candles == nil {
-		return ErrHandlerNotSet
-	}
-
 	if params.Limit <= 0 {
 		params.Limit = 100
 	}
@@ -84,7 +87,7 @@ func (b *Binance) SubscribeCandles(params CandlesParams) (err error) {
 				Symbol:  strings.ToUpper(params.Symbol),
 				Candles: Candles(*snapshot),
 			},
-		}, b.candles)
+		})
 	}
 
 	endpoint := fmt.Sprintf("%s@kline_%s", strings.ToLower(params.Symbol), params.Period)
@@ -94,7 +97,7 @@ func (b *Binance) SubscribeCandles(params CandlesParams) (err error) {
 		Method:   "SUBSCRIBE",
 		Params:   []string{endpoint},
 		Location: exchange.MarketLoc,
-	}, b.candles)
+	})
 
 	return
 }
@@ -107,7 +110,7 @@ func (b *Binance) UnsubscribeCandles(params CandlesParams) (err error) {
 		Method:   "UNSUBSCRIBE",
 		Params:   []string{endpoint},
 		Location: exchange.MarketLoc,
-	}, func(interface{}) {})
+	})
 
 	return
 }

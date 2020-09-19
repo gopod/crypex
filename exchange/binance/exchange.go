@@ -26,16 +26,16 @@ const (
 // New returns a new binance.
 func New() *Binance {
 	return &Binance{
+		Feeds: &Feeds{
+			Reports: make(chan *ReportsStream),
+			Candles: make(chan *CandlesStream),
+		},
+
 		publicLimit:  ratelimit.New(20),
 		tradingLimit: ratelimit.New(10),
 		connections:  make(map[string]*websocket.Conn),
 		wsLimit:      ratelimit.New(1, ratelimit.WithClock(Clock{})),
 	}
-}
-
-func (b *Binance) SetStreams(candles, reports exchange.HandlerFunc) {
-	b.candles = candles
-	b.reports = reports
 }
 
 func (c Clock) Now() time.Time {
@@ -182,7 +182,7 @@ func (b *Binance) Request(request exchange.RequestParams, response interface{}) 
 }
 
 // Stream returns a new connection with a specific endpoint.
-func (b *Binance) Stream(request exchange.StreamParams, handler exchange.HandlerFunc) error {
+func (b *Binance) Stream(request exchange.StreamParams) error {
 	b.Lock()
 	defer b.Unlock()
 	b.wsLimit.Take()
@@ -202,7 +202,7 @@ func (b *Binance) Stream(request exchange.StreamParams, handler exchange.Handler
 	}
 
 	if _, ok := b.connections[request.Location]; !ok {
-		conn, err = exchange.NewConn(streamURL, request.Endpoint, b.read, handler)
+		conn, err = exchange.NewConn(streamURL, request.Endpoint, b.read)
 		if err != nil {
 			return err
 		}

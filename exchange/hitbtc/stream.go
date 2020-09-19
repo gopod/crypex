@@ -2,49 +2,56 @@ package hitbtc
 
 import (
 	"encoding/json"
-	"log"
 	"strings"
 
 	"github.com/gopod/crypex/exchange"
 )
 
 // read redirects response to handler.
-func (h *HitBTC) read(event *exchange.Event, handler exchange.HandlerFunc) {
-	var redirect = func(response interface{}) {
-		err := json.Unmarshal(event.Params.([]byte), &response)
-		if err != nil {
-			log.Fatalf("unmarshal response: [hitbtc]: %v", err)
-		}
-
-		go handler(response)
-	}
-
+func (h *HitBTC) read(event *exchange.Event) {
 	switch event.Method {
 	case "error":
-		redirect(&APIError{})
+		object := &APIError{}
+
+		err := json.Unmarshal(event.Params.([]byte), &object)
+		if err != nil {
+			h.OnErr(err)
+		}
+
+		h.OnErr(object)
 
 	case "report":
-		redirect(&ReportsStream{})
+		object := &ReportsStream{}
+
+		err := json.Unmarshal(event.Params.([]byte), &object)
+		if err != nil {
+			h.OnErr(err)
+		}
+
+		h.Feeds.Reports <- object
 
 	case "candles":
-		go handler(event.Params.(*CandlesStream))
+		h.Feeds.Candles <- event.Params.(*CandlesStream)
 
 	case "updateCandles":
-		redirect(&CandlesStream{})
+		object := &CandlesStream{}
+
+		err := json.Unmarshal(event.Params.([]byte), &object)
+		if err != nil {
+			h.OnErr(err)
+		}
+
+		h.Feeds.Candles <- object
 	}
 }
 
 // SubscribeReports subscribes to the reports.
 func (h *HitBTC) SubscribeReports() (err error) {
-	if h.reports == nil {
-		return ErrHandlerNotSet
-	}
-
 	err = h.Stream(exchange.StreamParams{
 		Auth:     true,
 		Method:   "subscribeReports",
 		Location: exchange.TradingLoc,
-	}, h.reports)
+	})
 
 	return
 }
@@ -62,10 +69,6 @@ func (h *HitBTC) UnsubscribeReports() (err error) {
 
 // SubscribeCandles subscribes to the candles.
 func (h *HitBTC) SubscribeCandles(params CandlesParams) (err error) {
-	if h.candles == nil {
-		return ErrHandlerNotSet
-	}
-
 	if params.Limit <= 0 {
 		params.Limit = 100
 	}
@@ -83,14 +86,14 @@ func (h *HitBTC) SubscribeCandles(params CandlesParams) (err error) {
 				Symbol:  strings.ToUpper(params.Symbol),
 				Candles: Candles(*snapshot),
 			},
-		}, h.candles)
+		})
 	}
 
 	err = h.Stream(exchange.StreamParams{
 		Location: exchange.MarketLoc,
 		Method:   "subscribeCandles",
 		Params:   params,
-	}, h.candles)
+	})
 
 	return
 }
@@ -101,7 +104,7 @@ func (h *HitBTC) UnsubscribeCandles(params CandlesParams) (err error) {
 		Location: exchange.MarketLoc,
 		Method:   "unsubscribeCandles",
 		Params:   params,
-	}, func(interface{}) {})
+	})
 
 	return
 }

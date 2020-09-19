@@ -19,25 +19,9 @@ type hitbtcSuite struct {
 func (suite *hitbtcSuite) SetupSuite() {
 	suite.exchange = hitbtc.New()
 
-	suite.exchange.SetStreams(func(res interface{}) {
-		switch response := res.(type) {
-		case *hitbtc.CandlesStream:
-			if len(response.Candles) == 1 {
-				log.Println("[HitBTC][Candles] Update Received")
-			} else {
-				log.Println("[HitBTC][Candles] Snapshot Received")
-			}
-		case *hitbtc.APIError:
-			log.Printf("[HitBTC][Candles] Error: %v\n", response)
-		}
-	}, func(res interface{}) {
-		switch response := res.(type) {
-		case *hitbtc.ReportsStream:
-			log.Println("[HitBTC][Reports] Report Received")
-		case *hitbtc.APIError:
-			log.Printf("[HitBTC][Reports] Error: %v\n", response)
-		}
-	})
+	suite.exchange.OnErr = func(err error) {
+		log.Println(err)
+	}
 
 	suite.exchange.PublicKey = os.Getenv("HITBTC_PUBLIC_KEY")
 	suite.exchange.SecretKey = os.Getenv("HITBTC_SECRET_KEY")

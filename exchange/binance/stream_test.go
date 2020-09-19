@@ -1,37 +1,80 @@
 package binance_test
 
 import (
+	"strings"
+	"sync"
+
 	"github.com/gopod/crypex/exchange/binance"
-	"github.com/gopod/crypex/exchange/tests"
 )
 
 func (suite *binanceSuite) TestSubscribeReports() {
-	suite.NoError(suite.exchange.SubscribeReports())
+	needed, used := 2, 0
+	wg := sync.WaitGroup{}
+
+	suite.NoError(
+		suite.exchange.SubscribeReports(),
+	)
+
+	wg.Add(needed)
+
+	go func() {
+		for report := range suite.exchange.Feeds.Reports {
+			if used == needed {
+				break
+			}
+			used++
+
+			suite.NotEmpty(report)
+			suite.Equal(binance.BNB+binance.USD, strings.ToLower(report.Symbol))
+
+			wg.Done()
+		}
+	}()
 
 	suite.TestOrders()
 
-	tests.Wait()
+	wg.Wait()
 	suite.NoError(suite.exchange.UnsubscribeReports())
 }
 
 func (suite *binanceSuite) TestSubscribeCandles() {
+	needed, used := 2, 0
+	wg := sync.WaitGroup{}
+
+	suite.Run("Error", func() {
+		suite.NoError(suite.exchange.SubscribeCandles(
+			binance.CandlesParams{
+				Symbol: "XXX",
+				Period: binance.Period1Minute,
+			}),
+		)
+	})
+
 	params := binance.CandlesParams{
 		Snapshot: true,
 		Period:   binance.Period1Minute,
-		Symbol:   binance.BNB + binance.BTC,
+		Symbol:   binance.BNB + binance.USD,
 	}
 
-	suite.NoError(suite.exchange.SubscribeCandles(params))
+	wg.Add(needed)
 
-	tests.Wait()
-	suite.NoError(suite.exchange.UnsubscribeCandles(params))
+	go func() {
+		for candles := range suite.exchange.Feeds.Candles {
+			if used == needed {
+				break
+			}
+			used++
 
-	suite.Run("Fail", func() {
-		params := binance.CandlesParams{
-			Period: binance.Period1Minute,
-			Symbol: binance.USD + binance.BTC,
+			suite.T().Log(candles)
+			suite.NotEmpty(candles)
+			suite.NotEmpty(candles.Candles)
+			suite.Equal(binance.BNB+binance.USD, strings.ToLower(candles.Symbol))
+
+			wg.Done()
 		}
+	}()
 
-		suite.NoError(suite.exchange.SubscribeCandles(params))
-	})
+	suite.NoError(suite.exchange.SubscribeCandles(params))
+	wg.Wait()
+	suite.NoError(suite.exchange.UnsubscribeCandles(params))
 }
