@@ -33,6 +33,7 @@ See it in action:
 ```go
 import (
 	"log"
+	"sync"
 
 	"github.com/gopod/crypex/exchange/binance"
 	"github.com/gopod/crypex/exchange/hitbtc"
@@ -42,46 +43,45 @@ var HitBTC *hitbtc.HitBTC
 var Binance *binance.Binance
 
 func main() {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
 	HitBTC = hitbtc.New()
 	HitBTC.PublicKey, HitBTC.SecretKey = "YOUR_HITBTC_PUBLIC_KEY", "YOUR_HITBTC_SECRET_KEY"
 	Binance = binance.New()
 	Binance.PublicKey, Binance.SecretKey = "YOUR_BINANCE_PUBLIC_KEY", "YOUR_BINANCE_SECRET_KEY"
 
-	SubscribeReports()
-	SubscribeCandles()
+	onError := func(err error) {
+		log.Fatal(err)
+	}
+
+	HitBTC.OnErr = onError
+	Binance.OnErr = onError
+
+	go receiveHitBTCStreams()
+	go receiveBinanceStreams()
+
+	subscribeReports()
+	subscribeCandles()
+
+	
+
+	wg.Wait()
 }
 
-func SubscribeReports() {
-	defer func() {
-		err := HitBTC.UnsubscribeReports()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = Binance.UnsubscribeReports()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	err := HitBTC.SubscribeReports(
-		func(response interface{}) {
-			log.Println(response)
-		})
+func subscribeReports() {
+	err := HitBTC.SubscribeReports()
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = Binance.SubscribeReports(
-		func(response interface{}) {
-			log.Println(response)
-		})
+	err = Binance.SubscribeReports()
 	if err != nil {
 		log.Panic(err)
 	}
 }
 
-func SubscribeCandles() {
+func subscribeCandles() {
 	hitbtcParams := hitbtc.CandlesParams{
 		Symbol: hitbtc.BTC + hitbtc.USD,
 		Period: hitbtc.Period1Minute,
@@ -90,33 +90,44 @@ func SubscribeCandles() {
 		Symbol: binance.BNB + binance.USD,
 		Period: binance.Period1Minute,
 	}
-	defer func() {
-		err := HitBTC.UnsubscribeCandles(hitbtcParams)
-		if err != nil {
-			log.Fatal(err)
-		}
 
-		err = Binance.UnsubscribeCandles(binanceParams)
-		if err != nil {
-			log.Fatal(err)
+	err := HitBTC.SubscribeCandles(hitbtcParams)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	err = Binance.SubscribeCandles(binanceParams)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func receiveHitBTCStreams() {
+	go func() {
+		for candles := range HitBTC.Feeds.Candles {
+			log.Println(candles)
 		}
 	}()
 
-	err := HitBTC.SubscribeCandles(
-		hitbtcParams, func(response interface{}) {
-			log.Println(response)
-		})
-	if err != nil {
-		log.Panic(err)
-	}
+	go func() {
+		for report := range HitBTC.Feeds.Reports {
+			log.Println(report)
+		}
+	}()
+}
 
-	err = Binance.SubscribeCandles(
-		binanceParams, func(response interface{}) {
-			log.Println(response)
-		})
-	if err != nil {
-		log.Panic(err)
-	}
+func receiveBinanceStreams() {
+	go func() {
+		for candles := range Binance.Feeds.Candles {
+			log.Println(candles)
+		}
+	}()
+
+	go func() {
+		for report := range Binance.Feeds.Reports {
+			log.Println(report)
+		}
+	}()
 }
 
 ```
