@@ -65,7 +65,6 @@ func (suite *binanceSuite) TestSubscribeCandles() {
 			}
 			used++
 
-			suite.T().Log(candles)
 			suite.NotEmpty(candles)
 			suite.NotEmpty(candles.Candles)
 			suite.Equal(binance.BNB+binance.USD, strings.ToLower(candles.Symbol))

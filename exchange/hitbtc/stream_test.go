@@ -64,7 +64,6 @@ func (suite *hitbtcSuite) TestSubscribeCandles() {
 			}
 			used++
 
-			suite.T().Log(candles)
 			suite.NotEmpty(candles)
 			suite.NotEmpty(candles.Candles)
 			suite.Equal(hitbtc.BTC+hitbtc.USD, candles.Symbol)
