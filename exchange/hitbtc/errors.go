@@ -19,8 +19,8 @@ var (
 	ErrCurrencyNotFound = fmt.Errorf("currency not found")
 	// ErrSymbolNotFound error
 	ErrSymbolNotFound = fmt.Errorf("symbol not found")
-	// ErrHandlerNotSet error
-	ErrHandlerNotSet = fmt.Errorf("handlers not set")
+	// ErrOnErrNotSet error
+	ErrOnErrNotSet = fmt.Errorf("on error handler not set")
 	// ErrKeysNotSet error
 	ErrKeysNotSet = fmt.Errorf("hitbtc api keys not set")
 )
