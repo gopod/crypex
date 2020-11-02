@@ -81,9 +81,10 @@ type Type string
 
 // Symbol struct
 type Symbol struct {
-	ID    string `json:"id,required"`
-	Base  string `json:"baseCurrency,required"`
-	Quote string `json:"quoteCurrency,required"`
+	ID        string  `json:"id,required"`
+	Base      string  `json:"baseCurrency,required"`
+	Quote     string  `json:"quoteCurrency,required"`
+	Precision float64 `json:"quantityIncrement,string"`
 }
 
 // Symbols struct

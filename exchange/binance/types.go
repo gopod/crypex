@@ -101,9 +101,10 @@ type Type string
 
 // Symbol struct
 type Symbol struct {
-	ID    string `json:"symbol,required"`
-	Base  string `json:"baseAsset,required"`
-	Quote string `json:"quoteAsset,required"`
+	ID        string  `json:"symbol,required"`
+	Base      string  `json:"baseAsset,required"`
+	Quote     string  `json:"quoteAsset,required"`
+	Precision float64 `json:"baseAssetPrecision,required"`
 }
 
 // Symbols struct
